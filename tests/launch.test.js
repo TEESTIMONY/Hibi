@@ -15,7 +15,7 @@ test('opening screen reveals the planner after its minimum duration', async () =
     setTimeout: (callback, delay) => timers.push({ callback, delay }),
   });
   vm.runInContext(`${source}\nrevealPlanner();`, context);
-  assert.equal(timers[0].delay, 1050);
+  assert.equal(timers[0].delay, 2550);
   timers[0].callback();
   assert.deepEqual(changes, ['is-launching', 'leaving']);
   assert.equal(timers[1].delay, 350);
