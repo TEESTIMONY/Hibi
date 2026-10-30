@@ -10,7 +10,7 @@ async function collect(directory) {
   return results.flat();
 }
 
-const files = (await Promise.all(['src', 'server', 'public', 'scripts', 'tests'].map(collect))).flat();
+const files = (await Promise.all(['src', 'public', 'scripts', 'tests'].map(collect))).flat();
 for (const file of files.filter((file) => file.endsWith('.js'))) {
   const result = spawnSync(process.execPath, ['--check', file], { encoding: 'utf8' });
   if (result.status !== 0) throw new Error(result.stderr);

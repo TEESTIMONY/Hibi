@@ -1,0 +1,8 @@
+backend/
+tests/
+docs/
+.env
+.env.*
+!.env.example
+.openai/
+.git/

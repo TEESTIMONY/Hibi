@@ -1,0 +1,13 @@
+.ai-login-form {
+  border: 1px solid var(--line);
+  padding: 16px;
+  margin-top: 16px;
+  border-radius: 8px;
+  background: var(--panel);
+}
+.ai-login-form strong { font-size: 12px; font-weight: 550; }
+.ai-login-form p { font-size: 10px; line-height: 1.8; color: var(--muted); }
+.ai-login-form label { font-size: 10px; }
+.ai-login-form input { display: block; width: 100%; }
+.ai-login-form button { margin-top: 14px; padding: 9px 16px; background: #586fe0; color: white; border-radius: 6px; font-size: 11px; }
+#ai-sign-out { color: var(--muted); margin-top: 14px; font-size: 10px; }

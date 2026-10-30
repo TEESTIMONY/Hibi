@@ -1,5 +1,6 @@
-import { mkdir, cp, copyFile, readdir, rm } from 'node:fs/promises';
+import { mkdir, cp, copyFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { resolve, relative } from 'node:path';
+import { getPublicConfig, renderPublicConfig } from './frontend-config.js';
 
 const root = resolve('.');
 const output = resolve(root, 'dist');
@@ -14,5 +15,6 @@ for (const entry of await readdir(output)) {
 }
 await copyFile(resolve(root, 'index.html'), resolve(output, 'index.html'));
 await cp(resolve(root, 'src'), resolve(output, 'src'), { recursive: true });
-await cp(resolve(root, 'public'), resolve(output, 'public'), { recursive: true });
+await cp(resolve(root, 'public'), output, { recursive: true });
+await writeFile(resolve(output, 'src/config.js'), renderPublicConfig(getPublicConfig()));
 console.log('Built Hibi into dist/');

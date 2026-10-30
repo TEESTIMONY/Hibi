@@ -1,5 +1,5 @@
 import { $, escapeHtml as escape, showToast } from '../../utils/dom.js';
-import { getAIStatus, requestPlan, fileToSource, consumeShare } from './api.js';
+import { getAIStatus, requestPlan, fileToSource, consumeShare, signIn, signOut } from './api.js';
 import { createTasksFromPlan } from './plan-import.js';
 import { createVoiceCapture } from './voice.js';
 
@@ -39,10 +39,17 @@ export function createAIIntake({ getState, onImport }) {
         </form>
         <p id="ai-error" class="ai-error" role="alert" hidden></p>
         <div class="ai-setup" hidden>
-          <strong>Connect your OpenAI account</strong>
-          <p>In VS Code, copy <code>.env.example</code> to <code>.env</code>. Add your API key to <code>OPENAI_API_KEY</code>, then restart <code>npm run dev</code>. Your key stays on the server.</p>
+          <strong>AI planning is coming next</strong>
+          <p>The planner works independently. AI will be available when the separate Hibi API is connected.</p>
           <button type="button" id="ai-recheck">Check connection again ↻</button>
         </div>
+        <form id="ai-login-form" class="ai-login-form" hidden>
+          <strong>Sign in to Hibi</strong><p>Your API account gives you access to AI planning.</p>
+          <label for="ai-username">Username</label><input id="ai-username" autocomplete="username" required>
+          <label for="ai-password">Password</label><input id="ai-password" type="password" autocomplete="current-password" required>
+          <button type="submit">Sign in</button>
+        </form>
+        <button type="button" id="ai-sign-out" hidden>Sign out of Hibi API</button>
         <details class="ai-share-help"><summary>Bring something over from WhatsApp <span>↗</span></summary>
           <p>Install Hibi as an app on a supported Android / Chromium device. In WhatsApp, choose Share and select Hibi. Review the shared text here, then create your plan.</p>
           <p>Your phone needs a reachable HTTPS deployment. This computer’s localhost address cannot be opened on your phone. iPhone sharing needs a native share extension; paste or upload sources here for now.</p>
@@ -78,9 +85,17 @@ export function createAIIntake({ getState, onImport }) {
   async function checkStatus() {
     try {
       status = await getAIStatus();
-      find('.ai-status').textContent = status.configured ? `● ${status.provider} ready` : '○ OpenAI not connected';
-      find('.ai-status').classList.toggle('ready', status.configured);
-      find('.ai-setup').hidden = status.configured;
+      const needsLogin = status.requiresAuth && !status.authenticated;
+      find('.ai-status').textContent = !status.backendConfigured ? '○ UI preview'
+        : needsLogin ? '○ Sign in to use AI' : status.configured ? `● ${status.provider} ready` : '○ AI not configured';
+      find('.ai-status').classList.toggle('ready', status.configured && !needsLogin);
+      find('.ai-setup').hidden = Boolean(status.configured || needsLogin);
+      find('.ai-setup > strong').textContent = status.backendConfigured ? 'AI is not configured yet' : 'AI planning is coming next';
+      find('.ai-setup > p').textContent = status.backendConfigured
+        ? 'The API is connected, but its OpenAI configuration is not ready yet.'
+        : 'The planner works independently. AI will be available when the separate Hibi API is connected.';
+      find('#ai-login-form').hidden = !needsLogin;
+      find('#ai-sign-out').hidden = !status.authenticated;
     } catch (failure) {
       status = null;
       find('.ai-status').textContent = '○ Backend unavailable';
@@ -147,6 +162,22 @@ export function createAIIntake({ getState, onImport }) {
   find('#ai-record').addEventListener('click', () => recording ? voice.stop() : voice.start());
   find('#ai-example').addEventListener('click', () => { find('#ai-notes').value = EXAMPLE; });
   find('#ai-recheck').addEventListener('click', checkStatus);
+  find('#ai-login-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    error();
+    const button = find('#ai-login-form button');
+    button.disabled = true;
+    try {
+      await signIn(find('#ai-username').value, find('#ai-password').value);
+      find('#ai-password').value = '';
+      await checkStatus();
+    } catch (failure) { error(failure.message); }
+    finally { button.disabled = false; }
+  });
+  find('#ai-sign-out').addEventListener('click', async () => {
+    try { await signOut(); } catch (failure) { error(failure.message); }
+    await checkStatus();
+  });
   find('.ai-dropzone').addEventListener('click', () => { if (!busy) find('#ai-files').click(); });
   find('.ai-dropzone').addEventListener('keydown', (event) => {
     if (['Enter', ' '].includes(event.key)) { event.preventDefault(); find('#ai-files').click(); }
@@ -164,7 +195,9 @@ export function createAIIntake({ getState, onImport }) {
     event.preventDefault();
     if (busy || recording) return;
     error();
-    if (!status?.configured) { find('.ai-setup').hidden = false; error('Connect OpenAI to create a plan. No content has been sent.'); return; }
+    if (!status?.backendConfigured) { find('.ai-setup').hidden = false; error('AI is not connected yet. No content has been sent.'); return; }
+    if (status.requiresAuth && !status.authenticated) { find('#ai-login-form').hidden = false; error('Sign in to Hibi before creating an AI plan.'); return; }
+    if (!status.configured) { find('.ai-setup').hidden = false; error('OpenAI is not configured on the backend yet. No content has been sent.'); return; }
     if (!find('#ai-notes').value.trim() && !files.length) { error('Add a message, some notes, or a source file first.'); return; }
     busy = true;
     find('#ai-form').querySelectorAll('input, textarea, select, button').forEach((control) => { control.disabled = true; });
@@ -243,6 +276,7 @@ export function createAIIntake({ getState, onImport }) {
       const shared = await consumeShare(token);
       find('#ai-notes').value = [find('#ai-notes').value, shared.text].filter(Boolean).join('\n\n');
       addFiles(shared.files.map((source) => {
+        if (source instanceof Blob) return source;
         const binary = atob(source.data);
         return new File([Uint8Array.from(binary, (character) => character.charCodeAt(0))], source.name);
       }));
