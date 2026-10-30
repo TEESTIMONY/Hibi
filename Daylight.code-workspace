@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "editor.tabSize": 2,
+    "files.eol": "\n",
+    "search.exclude": {
+      "**/dist": true
+    },
+    "files.exclude": {
+      "**/node_modules": true
+    }
+  }
+}

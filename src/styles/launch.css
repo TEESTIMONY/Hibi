@@ -1,0 +1,71 @@
+/* Loaded separately so the opening screen does not wait for external fonts. */
+body.is-launching {
+  overflow: hidden;
+}
+
+.is-launching > aside,
+.is-launching > main {
+  visibility: hidden;
+}
+
+.launch-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: #fbfcfe;
+  opacity: 1;
+  transition: opacity 350ms ease;
+}
+
+.launch-brand {
+  display: flex;
+  align-items: center;
+  gap: 19px;
+}
+
+.launch-logo {
+  width: 70px;
+  height: 70px;
+  filter: drop-shadow(0 5px 12px #4568df20);
+}
+
+.launch-name {
+  color: #26334a;
+  font: 750 43px/1.2 Manrope, 'Segoe UI', sans-serif;
+  letter-spacing: -2px;
+}
+
+.launch-screen.leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.launch-screen[hidden] {
+  display: none;
+}
+
+.dark .launch-screen { background: #19212e; }
+.dark .launch-name { color: #dce5f3; }
+
+@media (max-width: 500px) {
+  .launch-logo { width: 58px; height: 58px; }
+  .launch-name { font-size: 36px; letter-spacing: -1.6px; }
+  .launch-brand { gap: 15px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launch-brand { animation: none; }
+  .launch-screen { transition: none; }
+}
+
+.brand .logo {
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+.brand .logo .hibi-brand-icon {
+  width: 35px;
+  height: 35px;
+}

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Hibi · Your personal planner</title>
+    <link rel="stylesheet" href="src/styles/launch.css">
+    <link rel="stylesheet" href="src/styles/index.css">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <meta name="theme-color" content="#4b6ee8">
+  </head>
+  <body class="is-launching">
+    <div id="launch-screen" class="launch-screen" role="status" aria-label="Opening Hibi">
+      <div class="launch-brand">
+        <svg class="launch-logo" viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="2" y="2" width="76" height="76" rx="23" fill="url(#hibi-launch-blue)"/>
+          <rect x="18" y="24" width="33" height="42" rx="7" transform="rotate(-12 34.5 45)" fill="#b5cdff"/>
+          <g transform="rotate(8 45 38)">
+            <rect x="28" y="16" width="34" height="44" rx="7" fill="#fff"/>
+            <circle cx="45" cy="29" r="5" fill="#7396ed"/>
+            <path d="M36 42h18M36 49h11" stroke="#99b3ef" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <defs><linearGradient id="hibi-launch-blue" x1="12" y1="3" x2="67" y2="79" gradientUnits="userSpaceOnUse"><stop stop-color="#7898ff"/><stop offset="1" stop-color="#4568df"/></linearGradient></defs></svg>
+        <span class="launch-name">Hibi</span>
+      </div>
+    </div>
+    <aside>
+      <a class="brand" href="#">
+        <span class="logo"><svg class="hibi-brand-icon" viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="2" y="2" width="76" height="76" rx="23" fill="url(#hibi-sidebar-blue)"/>
+          <rect x="18" y="24" width="33" height="42" rx="7" transform="rotate(-12 34.5 45)" fill="#b5cdff"/>
+          <g transform="rotate(8 45 38)">
+            <rect x="28" y="16" width="34" height="44" rx="7" fill="#fff"/>
+            <circle cx="45" cy="29" r="5" fill="#7396ed"/>
+            <path d="M36 42h18M36 49h11" stroke="#99b3ef" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <defs><linearGradient id="hibi-sidebar-blue" x1="12" y1="3" x2="67" y2="79" gradientUnits="userSpaceOnUse"><stop stop-color="#7898ff"/><stop offset="1" stop-color="#4568df"/></linearGradient></defs></svg></span>
+        Hibi
+        <span class="beta">PERSONAL</span>
+      </a>
+      <div class="search">
+        ⌕
+        <input id="search" placeholder="Quick find" aria-label="Search tasks">
+        <kbd>/</kbd>
+      </div>
+      <nav id="nav"></nav>
+      <button class="ai-sidebar-launch" data-action="open-ai" aria-label="Open AI planner"><span>✦</span><strong>Plan with AI</strong><small>NEW</small></button>
+      <div class="section-label">
+        YOUR SPACES
+        <button data-action="new-project" aria-label="Add project">+</button>
+      </div>
+      <div id="projects"></div>
+      <button class="sidebar-note" data-action="new-task">
+        <span>+</span>
+        <p>
+          Make space for an idea
+          <small>Capture it now. Sort it later.</small>
+        </p>
+      </button>
+      <div class="profile">
+        <span class="avatar">T</span>
+        <div>
+          My workspace
+          <small>Personal account</small>
+        </div>
+        <button id="theme" aria-label="Toggle dark mode">☼</button>
+      </div>
+    </aside>
+    <main>
+      <header>
+        <span id="breadcrumb">
+          My workspace
+          <b>/</b>
+          Today
+        </span>
+        <div class="header-actions">
+          <span class="saved">● Saved on this device</span>
+          <button class="ai-header-launch" data-action="open-ai">✦ <span>Plan with AI</span></button>
+          <button class="new-task" data-action="new-task">
+            +
+            <span>New to-do</span>
+            <kbd>N</kbd>
+          </button>
+        </div>
+      </header>
+      <div class="workspace">
+        <section class="task-pane">
+          <div class="eyebrow" id="date"></div>
+          <div class="title-row">
+            <h1>
+              <span id="view-icon">☀</span>
+              <span id="title">Today</span>
+            </h1>
+            <button class="more" data-action="toggle-completed" title="Show or hide completed tasks">•••</button>
+          </div>
+          <p class="subtitle" id="subtitle">Make room for what matters.</p>
+          <div class="week-strip" id="week-strip" aria-label="This week"></div>
+          <div class="tabs">
+            <button class="active" data-filter="all">
+              All tasks
+              <span id="total"></span>
+            </button>
+            <button data-filter="Work">Work</button>
+            <button data-filter="Personal">Personal</button>
+            <button data-filter="Health">Health</button>
+            <button class="add-top" data-action="new-task">+ New task</button>
+          </div>
+          <div id="tasks"></div>
+          <button class="add-row" data-action="new-task">
+            +
+            <span>Add a to-do</span>
+            <kbd>N</kbd>
+          </button>
+          <div class="endnote">
+            <span>✓</span>
+            You have space to do something great.
+          </div>
+        </section>
+        <section class="day-pane">
+          <div class="day-card">
+            <div class="card-top">
+              A LITTLE PERSPECTIVE
+              <span>☀</span>
+            </div>
+            <h2>
+              Less busy.
+              <br>
+              More meaningful.
+            </h2>
+            <p>A little focus goes a long way.</p>
+            <div class="sun-art">
+              <div class="sun"></div>
+              <div class="hill h1"></div>
+              <div class="hill h2"></div>
+              <div class="hill h3"></div>
+            </div>
+            <div class="daily-progress-title">
+              Today’s progress
+              <span>↗</span>
+            </div>
+            <div class="progress-label">
+              <strong id="progress-text"></strong>
+              <span id="progress-percent"></span>
+            </div>
+            <div class="progress">
+              <i id="progress"></i>
+            </div>
+            <small>One step closer. You’ve got this.</small>
+          </div>
+          <div class="schedule">
+            <div class="schedule-heading">
+              <h3>On your calendar</h3>
+              <span id="shortdate"></span>
+            </div>
+            <p class="calendar-hint">Your sample schedule</p>
+            <div class="event">
+              <time>
+                09:30
+                <small>10:00</small>
+              </time>
+              <div>
+                <strong>Morning check-in</strong>
+                <small>Design team · Google Meet</small>
+              </div>
+            </div>
+            <div class="event purple">
+              <time>
+                14:00
+                <small>15:00</small>
+              </time>
+              <div>
+                <strong>Focus time</strong>
+                <small>A moment for deep work</small>
+              </div>
+            </div>
+            <div class="calendar-foot">
+              Sample schedule
+              <span>◷</span>
+            </div>
+          </div>
+          <div class="shortcut-card">
+            <span class="shortcut-icon">⌘</span>
+            <strong>Less clicking, more doing.</strong>
+            <p>
+              <kbd>N</kbd>
+              New to-do
+              <kbd>/</kbd>
+              Quick find
+            </p>
+          </div>
+        </section>
+      </div>
+      <footer>
+        <span>Your space to think clearly.</span>
+        <span>
+          Made for a little everyday progress
+          <b>✦</b>
+        </span>
+      </footer>
+    </main>
+    <dialog id="editor">
+      <form id="task-form">
+        <div class="modal-heading">
+          <span id="modal-title">New to-do</span>
+          <button type="button" data-action="close-editor">×</button>
+        </div>
+        <input id="task-title" placeholder="What would you like to do?" required aria-label="Task title">
+        <textarea id="task-notes" placeholder="Notes, ideas, or a little context…" aria-label="Notes"></textarea>
+        <label>
+          When
+          <select id="task-when">
+            <option>Today</option>
+            <option>This Evening</option>
+            <option>Tomorrow</option>
+            <option>Anytime</option>
+            <option>Someday</option>
+            <option>Inbox</option>
+          </select>
+        </label>
+        <label>
+          Space
+          <select id="task-project"></select>
+        </label>
+        <label>
+          Checklist
+          <textarea id="task-checklist" placeholder="One step per line"></textarea>
+        </label>
+        <div class="modal-footer">
+          <button type="button" id="delete-task">Delete</button>
+          <button class="primary" type="submit">Save to-do</button>
+        </div>
+      </form>
+    </dialog>
+    <div id="toast" role="status"></div>
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>

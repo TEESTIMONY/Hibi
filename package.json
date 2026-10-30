@@ -1,0 +1,14 @@
+{
+  "name": "hibi-planner",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A personal planner with reviewed AI plans from messages, documents, and voice.",
+  "engines": { "node": ">=20.12" },
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "build": "node scripts/build.js",
+    "test": "node --test",
+    "check": "node scripts/check.js"
+  }
+}
