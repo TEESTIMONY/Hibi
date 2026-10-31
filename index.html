@@ -224,6 +224,19 @@
           Checklist
           <textarea id="task-checklist" placeholder="One step per line"></textarea>
         </label>
+        <fieldset class="task-scheduling">
+          <legend>Schedule</legend>
+          <p>Choose a date, or leave it blank to use When. Add a time and duration for a time slot.</p>
+          <div class="schedule-fields">
+            <label>Scheduled date<input id="task-date" type="date"></label>
+            <label>Start time<input id="task-start" type="time" step="60"></label>
+            <label>Duration (minutes)<input id="task-duration" type="number" min="1" max="1440" step="1" placeholder="30"></label>
+            <label>Deadline<input id="task-deadline" type="date"></label>
+            <label class="schedule-zone">Timezone<input id="task-zone" list="task-timezones" value="Africa/Lagos" required></label>
+          </div>
+          <datalist id="task-timezones"><option value="Africa/Lagos"><option value="Europe/London"><option value="America/New_York"><option value="Asia/Seoul"><option value="UTC"></datalist>
+          <p id="task-schedule-error" role="alert"></p>
+        </fieldset>
         <div class="modal-footer">
           <button type="button" id="delete-task">Delete</button>
           <button class="primary" type="submit">Save to-do</button>

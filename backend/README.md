@@ -43,7 +43,7 @@ Files are optional. Maximum eight files, 8 MB per file, 12 MB total; pasted note
 
 The output contains title, summary, assumptions, questions, named sources, suggested tasks, and `planId`. Structured output validation checks source references, supported timing values, real calendar deadlines, and effort estimates. Tasks are not executed automatically. The frontend lets users edit/select suggestions before importing them into browser task storage.
 
-The backend saves generated draft plans per authenticated user. It does not save uploaded source files as separate records and does not synchronize the UI's task lists. Model requests use `store: false`; provider-side retention policies still apply.
+The backend saves generated draft plans per authenticated user. It does not save uploaded source files as separate records. Task/project synchronization uses the separate workspace endpoint described in [account storage](../docs/ACCOUNTS.md). Model requests use `store: false`; provider-side retention policies still apply.
 
 ## Layout
 

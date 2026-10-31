@@ -1,5 +1,6 @@
 import { API_BASE_URL } from '../../config.js';
 import { consumeLocalShare } from './share-store.js';
+import { apiErrorMessage } from '../../services/api-errors.js';
 
 const TOKEN_KEY = `hibi-api-token:${API_BASE_URL}`;
 
@@ -17,12 +18,15 @@ async function readResponse(response) {
   catch { throw new Error('The Django API did not return JSON. Check the configured backend URL.'); }
   if (!response.ok) {
     if (response.status === 401) { try { sessionStorage.removeItem(TOKEN_KEY); } catch {} }
-    throw new Error(body.error || 'The API request could not be completed.');
+    const error = new Error(apiErrorMessage(body));
+    error.status = response.status;
+    error.details = body.details;
+    throw error;
   }
   return body;
 }
 
-function apiRequest(path, options = {}) {
+export function apiRequest(path, options = {}) {
   if (!API_BASE_URL) throw new Error('AI is not connected yet. The planner works in UI-only mode.');
   const token = getToken();
   return fetch(`${API_BASE_URL}${path}`, {
@@ -37,18 +41,22 @@ export async function getAIStatus() {
   return { ...await apiRequest('/api/ai/status', { cache: 'no-store' }), backendConfigured: true };
 }
 
-export async function signIn(username, password) {
-  const result = await apiRequest('/api/auth/token', {
+export async function signIn(username, password, register = false) {
+  const result = await apiRequest(register ? '/api/auth/register' : '/api/auth/token', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
   });
   try { sessionStorage.setItem(TOKEN_KEY, result.token); }
   catch { throw new Error('Your browser could not save this session. Enable session storage to sign in.'); }
+  globalThis.dispatchEvent?.(new Event('hibi-session-changed'));
 }
 
 export async function signOut() {
   try { await apiRequest('/api/auth/logout', { method: 'POST' }); }
-  finally { try { sessionStorage.removeItem(TOKEN_KEY); } catch {} }
+  finally {
+    try { sessionStorage.removeItem(TOKEN_KEY); } catch {}
+    globalThis.dispatchEvent?.(new Event('hibi-session-changed'));
+  }
 }
 
 export function requestPlan(payload, signal) {

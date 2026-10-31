@@ -16,7 +16,6 @@ export function renderDashboard({ view, tasks, showCompleted }) {
   $('#breadcrumb').textContent = `My workspace / ${view}`;
   $('#subtitle').textContent = SUBTITLES[view] ?? 'Small steps toward something meaningful.';
   $('#date').textContent = formatDate({ weekday: 'long', month: 'long', day: 'numeric' });
-  $('#shortdate').textContent = formatDate({ month: 'short', day: 'numeric' });
 
   const completedLabel = showCompleted ? 'Hide completed tasks' : 'Show completed tasks';
   $('.more').innerHTML = icon('more');

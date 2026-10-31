@@ -44,7 +44,7 @@ OPENAI_TRANSCRIPTION_MODEL=gpt-4o-mini-transcribe
 
 Allow only your actual frontend origins; no wildcard CORS is configured. The default production settings enforce HTTPS. Set up TLS forwarding correctly on your host; if it terminates TLS at a reverse proxy, configure Django's proxy SSL handling only for that trusted proxy. Serve the collected admin static files through the backend host's static-file/CDN setup if you use the admin UI.
 
-Run `python manage.py check --deploy` against production settings. Create an account with `python manage.py createsuperuser`, or provision ordinary Django users through your account-management process. There are no bundled users or passwords. Registration, password reset, social login, and task synchronization are not part of this first API.
+Run `python manage.py check --deploy` against production settings. Create an account with `python manage.py createsuperuser`, or provision ordinary Django users through your account-management process. There are no bundled users or passwords. Registration and workspace synchronization are available; see ACCOUNTS.md. Password reset and social login are not implemented.
 
 ## Authentication and requests
 

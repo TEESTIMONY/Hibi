@@ -1,0 +1,23 @@
+.account-launch { border: 0; background: transparent; color: inherit; font: inherit; font-size: 12px; padding: 6px 4px; cursor: pointer; max-width: 80px; overflow: hidden; text-overflow: ellipsis; }
+.account-dialog { width: min(340px, calc(100% - 32px)); border: 1px solid #dce1eb; border-radius: 16px; padding: 22px; color: #27344b; background: #fff; box-shadow: 0 25px 90px #17223830; }
+.account-dialog::backdrop { background: #19233880; backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
+.account-dialog h2 { margin: 0 0 8px; font-size: 20px; }
+#account-sync-status { font-size: 12px; margin: 0 0 18px; }
+.account-dialog form, #account-tools { display: grid; gap: 10px; }
+.account-dialog label { display: grid; gap: 5px; font-size: 12px; }
+.account-dialog label:has(input[type=checkbox]) { display: flex; align-items: center; justify-content: space-between; min-height: 32px; }
+.account-dialog input { padding: 9px 10px; border: 1px solid #dce1eb; border-radius: 9px; font: inherit; width: 100%; box-sizing: border-box; }
+.account-dialog input[type=checkbox] { width: auto; justify-self: start; }
+.account-dialog button { padding: 10px 14px; border: 1px solid #dae0eb; border-radius: 9px; background: #f3f6fd; color: #3458b8; font: inherit; cursor: pointer; }
+.account-dialog .account-close { float: right; padding: 2px 7px; margin: -6px -6px 0 4px; }
+#account-error:empty { display: none; }
+#account-error { font-size: 13px; line-height: 1.6; color: #93432f; overflow-wrap: anywhere; }
+.dark .account-dialog { background: #202b3d; color: #e5eaf5; }
+.account-dialog [hidden] { display: none !important; }
+.profile .account-launch { white-space: nowrap; flex-shrink: 0; width: auto; font-size: 12px; padding: 6px 4px; }
+.account-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: #edf1f8; border-radius: 10px; margin-bottom: 6px; }
+.account-modes button { border: 0; background: transparent; padding: 8px 4px; font-size: 12px; }
+.account-modes button[aria-pressed=true] { background: #fff; box-shadow: 0 1px 4px #17223818; font-weight: 650; }
+.dark .account-modes { background: #172131; }
+.dark .account-modes button { color: #becdeb; }
+.dark .account-modes button[aria-pressed=true] { background: #34445d; color: #fff; }

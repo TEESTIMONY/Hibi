@@ -5,7 +5,7 @@ Hibi is split into two independently deployable applications:
 - **Frontend:** HTML, CSS, and JavaScript in the project root. Deploy this UI to Vercel.
 - **Backend:** Django 5.2 + Django REST Framework in `backend/`. Host it separately when you are ready for AI.
 
-No backend or OpenAI key is required to use the planner UI. Tasks continue to save in the browser.
+No backend or OpenAI key is required to use the planner UI in device-only mode. Connect Django and sign in for account storage.
 
 ## Frontend: run locally
 
@@ -88,7 +88,7 @@ tests/                   Frontend tests
 
 ## Data and sharing
 
-Tasks and theme preferences use the original browser storage keys, so renaming/refactoring does not discard them. Browser data remains local to an origin; deploying to a new domain does not transfer localhost tasks. Accepted AI tasks are still stored in the browser; generated plan history belongs to the authenticated Django user. Full task synchronization is not implemented.
+Tasks and theme preferences use the original browser storage keys, so renaming/refactoring does not discard them. Browser data remains local to an origin; deploying to a new domain does not transfer localhost tasks. Accepted AI tasks use the same storage and synchronization path as manually created tasks; generated plan history belongs to the authenticated Django user. Signed-in tasks and projects now synchronize through Django, with per-account device caches, explicit guest import, and conflict protection. See [account storage](docs/ACCOUNTS.md).
 
 On compatible installed Android/Chromium PWAs, incoming WhatsApp shares are handled by a service worker and stored temporarily in this browser's IndexedDB. They do not require a Vercel backend. Sources are not sent to Django/OpenAI until you explicitly choose to analyze them. Expired shares are removed on the next share; consumed shares are deleted immediately. iPhone native sharing still needs a separate native extension.
 

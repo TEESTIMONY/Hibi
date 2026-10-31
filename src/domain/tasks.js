@@ -1,8 +1,11 @@
-export function belongsToView(task, view) {
+import { effectiveWhen } from './scheduling.js';
+
+export function belongsToView(task, view, now = new Date()) {
+  const when = effectiveWhen(task, now);
   if (view === 'Logbook') return Boolean(task.done);
-  if (view === 'Today') return ['Today', 'This Evening'].includes(task.when);
-  if (view === 'Upcoming') return task.when === 'Tomorrow';
-  if (['Inbox', 'Anytime', 'Someday'].includes(view)) return task.when === view;
+  if (view === 'Today') return ['Today', 'This Evening', 'Overdue'].includes(when);
+  if (view === 'Upcoming') return ['Tomorrow', 'Upcoming'].includes(when);
+  if (['Inbox', 'Anytime', 'Someday'].includes(view)) return when === view;
   return task.project === view;
 }
 

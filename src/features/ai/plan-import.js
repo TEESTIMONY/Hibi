@@ -1,4 +1,5 @@
 import { getProjectTag } from '../../domain/tasks.js';
+import { schedulingFields, DEFAULT_TIME_ZONE } from '../../domain/scheduling.js';
 
 export function createTasksFromPlan(plan, selected, project, createId = () => crypto.randomUUID()) {
   const sourceNames = new Map(plan.sources.map((source) => [source.id, source.name]));
@@ -18,6 +19,7 @@ export function createTasksFromPlan(plan, selected, project, createId = () => cr
       estimatedMinutes: suggestion.estimatedMinutes,
       checks: suggestion.checklist.map((text) => ({ text, done: false })),
       done: false, origin: 'ai-plan',
+      ...schedulingFields({ date: '', startTime: '', duration: '', timeZone: DEFAULT_TIME_ZONE, dueDate: suggestion.dueDate, when: suggestion.when }),
     };
   });
 }

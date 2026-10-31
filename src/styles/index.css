@@ -3,4 +3,7 @@
 @import './workspace.css';
 @import './ai.css';
 @import './api-connection.css';
+@import './account.css';
+@import './responsive.css';
+@import './scheduling.css';
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;750;800&display=swap');

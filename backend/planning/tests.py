@@ -96,6 +96,8 @@ class ProviderTests(SimpleTestCase):
 @override_settings(PASSWORD_HASHERS=["django.contrib.auth.hashers.MD5PasswordHasher"])
 class APITests(APITestCase):
     def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
         self.user = get_user_model().objects.create_user("test-user", password="test-password-not-real")
 
     def test_health_and_status_work_without_login_and_do_not_expose_secrets(self):

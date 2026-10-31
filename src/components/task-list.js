@@ -1,6 +1,7 @@
 import { $, escapeHtml as escape } from '../utils/dom.js';
 import { selectTasks } from '../domain/tasks.js';
 import { icon } from './icons.js';
+import { effectiveWhen, scheduleLabel } from '../domain/scheduling.js';
 
 function renderChecklist(task) {
   return `<div class="mini-checks">${task.checks.map((item, index) => `
@@ -27,6 +28,8 @@ function renderTask(task) {
             <span class="tag ${escape(task.tag)}">${escape(task.tag)}</span>
             ${task.project !== task.tag ? `<span>◉ ${escape(task.project)}</span>` : ''}
             ${task.notes ? '<span>≡</span>' : ''}${checklistCount}
+            ${task.scheduledDate ? `<span class="task-schedule-label">${escape(scheduleLabel(task))}</span>` : ''}
+            ${task.dueDate ? `<span>Deadline ${escape(task.dueDate)}</span>` : ''}
           </div>
         </div>
         ${expanded ? renderChecklist(task) : ''}
@@ -37,11 +40,13 @@ function renderTask(task) {
 export function renderTaskList(state) {
   const tasks = selectTasks(state.tasks, state);
   const groups = state.view === 'Today'
-    ? [{ title: 'Your focus', when: 'Today' }, { title: 'This evening', when: 'This Evening' }]
+    ? [{ title: 'Overdue', when: 'Overdue' }, { title: 'Your focus', when: 'Today' }, { title: 'This evening', when: 'This Evening' }]
     : [{ title: state.view }];
 
   $('#tasks').innerHTML = groups.map((group) => {
-    const rows = tasks.filter((task) => !group.when || task.when === group.when);
+    const rows = tasks.filter((task) => !group.when || effectiveWhen(task) === group.when)
+      .sort((a, b) => (a.scheduledDate || '').localeCompare(b.scheduledDate || '') || (a.startTime || '99:99').localeCompare(b.startTime || '99:99'));
+    if (group.when === 'Overdue' && !rows.length) return '';
     return `
       <div class="group-heading">
         <span>${icon(group.when === 'This Evening' ? 'moon' : 'Today')}</span>

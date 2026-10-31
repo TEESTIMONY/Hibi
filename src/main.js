@@ -1,6 +1,6 @@
 import { DEFAULT_PLANNER } from './data/defaults.js';
 import { createStore } from './state/store.js';
-import { loadPlanner, savePlanner, loadTheme, saveTheme } from './services/storage.js';
+import { loadPlanner, loadTheme, saveTheme } from './services/storage.js';
 import { upsertTask } from './domain/tasks.js';
 import { renderNavigation } from './components/navigation.js';
 import { renderTaskList } from './components/task-list.js';
@@ -10,6 +10,9 @@ import { icon } from './components/icons.js';
 import { $, showToast } from './utils/dom.js';
 import { createAIIntake } from './features/ai/intake.js';
 import { revealPlanner } from './features/launch.js';
+import { createAccount } from './features/account.js';
+import { setupMobileNavigation } from './features/mobile-navigation.js';
+import { renderSchedule } from './components/schedule.js';
 
 const store = createStore({
   ...loadPlanner(localStorage, DEFAULT_PLANNER),
@@ -18,17 +21,20 @@ const store = createStore({
   search: '',
   showCompleted: true,
 });
+const account = createAccount({ store, fallback: DEFAULT_PLANNER });
+setupMobileNavigation();
 
 function render(state) {
   renderNavigation(state);
   renderTaskList(state);
   renderDashboard(state);
+  renderSchedule(state.tasks);
 }
 
 function saveChanges(patch) {
   const next = { ...store.getState(), ...patch };
   try {
-    savePlanner(localStorage, next);
+    if (!account.save(next)) return false;
     store.update(patch);
     return true;
   } catch {
@@ -152,6 +158,8 @@ $('#theme').addEventListener('click', () => {
 
 store.subscribe(render);
 render(store.getState());
+window.addEventListener('focus', () => render(store.getState()));
+setInterval(() => render(store.getState()), 60000);
 revealPlanner();
 
 if ('serviceWorker' in navigator) {
