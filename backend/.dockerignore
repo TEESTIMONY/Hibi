@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+.venv
+.tmp
+.pip-cache
+__pycache__
+**/__pycache__
+*.pyc
+*.sqlite3
+staticfiles
+.git
+test*.py
+**/test*.py

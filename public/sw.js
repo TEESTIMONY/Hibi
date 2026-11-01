@@ -1,5 +1,32 @@
 // Receive phone shares entirely in the browser: Vercel serves static assets only.
 const DATABASE = 'hibi-incoming-shares';
+self.addEventListener('push', (event) => {
+  event.waitUntil((async () => {
+    let payload = {};
+    try { payload = event.data?.json() || {}; } catch {}
+    await self.registration.showNotification(String(payload.title || 'Hibi').slice(0, 100), {
+      body: String(payload.body || 'Open Hibi to see your update.').slice(0, 250),
+      icon: '/icon.svg', tag: String(payload.tag || 'hibi-update').slice(0, 100),
+      data: { taskId: typeof payload.taskId === 'string' ? payload.taskId : '' },
+    });
+  })());
+});
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const url = new URL('/', self.location.origin);
+    const taskId = event.notification.data?.taskId;
+    if (taskId) url.searchParams.set('task', taskId);
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of windows) {
+      if (new URL(client.url).origin === self.location.origin) {
+        await client.navigate(url.href);
+        return client.focus();
+      }
+    }
+    return self.clients.openWindow(url.href);
+  })());
+});
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 

@@ -1,8 +1,12 @@
 from django.urls import path
 from .views import AIStatusView, HealthView, PlanHistoryView, SuggestPlanView, TokenLoginView, TokenLogoutView
 from .workspace import RegisterView, MeView, WorkspaceView
+from .notifications import NotificationConfigView, PushDeviceView, TestNotificationView
 
 urlpatterns = [
+    path("notifications/config", NotificationConfigView.as_view()),
+    path("notifications/subscriptions", PushDeviceView.as_view()),
+    path("notifications/test", TestNotificationView.as_view()),
     path("auth/register", RegisterView.as_view()),
     path("auth/me", MeView.as_view()),
     path("workspace", WorkspaceView.as_view()),

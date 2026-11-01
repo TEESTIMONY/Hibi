@@ -1,5 +1,9 @@
 # Hibi Django REST API
 
+Web-push endpoints and the Lightsail reminder timer are described in [notifications](../docs/NOTIFICATIONS.md). Production notification keys must be generated on the server after deploying the new migration.
+
+AWS production files and the deployment sequence are documented in [AWS deployment](../docs/AWS-DEPLOYMENT.md). Use `backend/` as the Docker build context. No cloud resources have been provisioned.
+
 This is a separately deployable Python backend. The Vercel frontend neither runs this project nor contains its credentials.
 
 ## Local setup

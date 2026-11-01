@@ -1,0 +1,18 @@
+[Unit]
+Description=Send due Hibi reminders
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/Hibi/backend
+Environment=DJANGO_SETTINGS_MODULE=config.production
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/ubuntu/Hibi/backend/.venv/bin/python manage.py send_reminders
+TimeoutStartSec=120
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+UMask=0077

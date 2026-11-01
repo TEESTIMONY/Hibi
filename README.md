@@ -5,7 +5,7 @@ Hibi is split into two independently deployable applications:
 - **Frontend:** HTML, CSS, and JavaScript in the project root. Deploy this UI to Vercel.
 - **Backend:** Django 5.2 + Django REST Framework in `backend/`. Host it separately when you are ready for AI.
 
-No backend or OpenAI key is required to use the planner UI in device-only mode. Connect Django and sign in for account storage.
+A connected Django API and sign-in are required to use the planner. Signed-out visitors see only authentication; no demo tasks are loaded. OpenAI is optional for ordinary task planning.
 
 ## Frontend: run locally
 
@@ -36,7 +36,7 @@ Import the GitHub repository into Vercel with these settings:
 | Build command | `npm run build` |
 | Output directory | `dist` |
 
-`vercel.json` already defines the build and output. Leave `HIBI_API_BASE_URL` unset for UI-only hosting. **Do not add an OpenAI API key to the frontend or Vercel project.** No Vercel Functions or Python backend are deployed by this setup.
+`vercel.json` already defines the build and output. Set `HIBI_API_BASE_URL` to your hosted API origin to enable sign-in. Without an API origin, only the disconnected authentication screen is available. **Do not add an OpenAI API key to the frontend or Vercel project.** No Vercel Functions or Python backend are deployed by this setup.
 
 When Django is hosted, set the public Vercel build variable `HIBI_API_BASE_URL=https://your-api.example.com` and redeploy. This is a public origin, not a secret. Set Django's `HIBI_FRONTEND_ORIGINS` to the exact frontend URL. Files and AI requests then go directly from the browser to Django, without going through Vercel Functions.
 

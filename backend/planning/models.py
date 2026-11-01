@@ -38,3 +38,31 @@ class SuggestedPlan(models.Model):
 
     class Meta:
         ordering = ["-created_at", "-pk"]
+
+
+class PushDevice(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    endpoint = models.URLField(max_length=2048, unique=True)
+    keys = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Reminder(models.Model):
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE)
+    fingerprint = models.CharField(max_length=64)
+    task_id = models.CharField(max_length=80)
+    due_at = models.DateTimeField(db_index=True)
+    state = models.CharField(max_length=20, default="pending")
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["workspace", "fingerprint"], name="unique_workspace_reminder")]
+
+
+class PushDelivery(models.Model):
+    reminder = models.ForeignKey(Reminder, on_delete=models.CASCADE)
+    device = models.ForeignKey(PushDevice, on_delete=models.CASCADE)
+    state = models.CharField(max_length=20, default="pending")
+    attempted_at = models.DateTimeField(null=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["reminder", "device"], name="unique_reminder_device")]

@@ -1,5 +1,7 @@
 # Separate frontend and API deployment
 
+For the AWS backend setup, see [AWS deployment](AWS-DEPLOYMENT.md): ECS/Fargate, private RDS PostgreSQL, Secrets Manager, and the prepared container.
+
 ## Vercel: UI only
 
 Push this source state to GitHub, then import the repository into Vercel. Use the repository root, Framework Preset **Other**, Build Command `npm run build`, and Output Directory `dist`. These are also declared in `vercel.json`.

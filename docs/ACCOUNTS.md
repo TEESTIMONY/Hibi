@@ -10,7 +10,7 @@ backend/.venv/Scripts/python.exe backend/manage.py runserver 127.0.0.1:8000
 
 The ignored root `.env` now points the local frontend at `http://127.0.0.1:8000`. This local address is not committed or used by Vercel. For a deployment, set `HIBI_API_BASE_URL` to the hosted HTTPS Django origin and allow the frontend origin in Django.
 
-Open the planner without `?preview=opening`. Click **Sign in** near the bottom of the sidebar. Enter a username and password, selecting **Create a new account** if needed. Django validates and hashes passwords; no default account or password is installed. Password reset and email verification remain future work.
+Open the planner without `?preview=opening`. Signed-out visitors see only the Sign in / Create account screen; the workspace stays hidden until authentication and workspace loading succeed. Enter a username and password, selecting **Create a new account** if needed. Django validates and hashes passwords; no default account or password is installed. Password reset and email verification remain future work.
 
 New accounts start empty with a Personal space. Use **Import this device’s tasks** to copy the current guest workspace, including any demo entries it contains. The guest data remains untouched. Import is offered only before the first account save, preventing accidental repeated migration.
 
@@ -27,7 +27,7 @@ The first version uses a bounded workspace snapshot API rather than independent 
 
 ## Pending changes and conflicts
 
-The browser writes a private account-specific cache before sending an edit. Guest storage retains its original key. Account caches include the API origin and user ID, avoiding mixing multiple users' data. Do not treat a shared browser profile as private storage: cached notes remain on this device after signing out.
+The sign-in token persists in local storage, scoped to the API origin, so closing a tab or restarting the browser does not end the session. Legacy session-storage tokens migrate automatically. Explicit logout or a server 401 revokes access; a network failure does not clear the session. Other tabs respond to sign-in/sign-out storage changes. DRF tokens currently have no idle timeout or automatic expiry. Clearing site data or using private browsing can still end the saved login. The browser writes a private account-specific cache before sending an edit. Guest storage retains its original key. Account caches include the API origin and user ID, avoiding mixing multiple users' data. Do not treat a shared browser profile as private storage: cached notes remain on this device after signing out.
 
 A single save runs per tab, queuing edits made while a previous save is in flight. Pending edits survive a failed network request. Reconnecting triggers a retry, and **Retry sync** is available in the account panel. If the initial account connection fails, editing is blocked until the connection can establish the correct workspace.
 

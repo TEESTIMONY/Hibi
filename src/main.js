@@ -1,6 +1,5 @@
-import { DEFAULT_PLANNER } from './data/defaults.js';
 import { createStore } from './state/store.js';
-import { loadPlanner, loadTheme, saveTheme } from './services/storage.js';
+import { loadTheme, saveTheme } from './services/storage.js';
 import { upsertTask } from './domain/tasks.js';
 import { renderNavigation } from './components/navigation.js';
 import { renderTaskList } from './components/task-list.js';
@@ -13,15 +12,17 @@ import { revealPlanner } from './features/launch.js';
 import { createAccount } from './features/account.js';
 import { setupMobileNavigation } from './features/mobile-navigation.js';
 import { renderSchedule } from './components/schedule.js';
+import { createNotifications } from './features/notifications.js';
 
 const store = createStore({
-  ...loadPlanner(localStorage, DEFAULT_PLANNER),
+  tasks: [], projects: [],
   view: 'Today',
   filter: 'all',
   search: '',
   showCompleted: true,
 });
-const account = createAccount({ store, fallback: DEFAULT_PLANNER });
+const account = createAccount({ store });
+createNotifications({ isReady: account.isReady, getUserId: account.getUserId });
 setupMobileNavigation();
 
 function render(state) {
@@ -71,6 +72,7 @@ function createProject() {
 }
 
 const aiIntake = createAIIntake({
+  canUse: account.isReady,
   getState: store.getState,
   onImport(tasks, project) {
     const saved = saveChanges({ tasks: [...store.getState().tasks, ...tasks] });
@@ -93,6 +95,7 @@ const actions = {
 
 // Delegate dynamic list events once, rather than rebinding after every render.
 document.addEventListener('click', (event) => {
+  if (!account.isReady()) return;
   const action = event.target.closest('[data-action]');
   if (action) return actions[action.dataset.action]?.();
   const destination = event.target.closest('[data-view]');
@@ -126,6 +129,7 @@ $('#tasks').addEventListener('change', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
+  if (!account.isReady()) return;
   const task = event.target.closest('[data-edit]');
   if (task && ['Enter', ' '].includes(event.key)) {
     event.preventDefault();
@@ -161,6 +165,18 @@ render(store.getState());
 window.addEventListener('focus', () => render(store.getState()));
 setInterval(() => render(store.getState()), 60000);
 revealPlanner();
+function openNotificationTask() {
+  if (!account.isReady()) return;
+  const url = new URL(location.href);
+  const id = url.searchParams.get('task');
+  if (!id) return;
+  url.searchParams.delete('task');
+  history.replaceState(null, '', url);
+  if (store.getState().tasks.some((task) => String(task.id) === id)) editor.open(id);
+  else showToast('This task is no longer in your workspace.');
+}
+globalThis.addEventListener('hibi-workspace-ready', openNotificationTask);
+openNotificationTask();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => {

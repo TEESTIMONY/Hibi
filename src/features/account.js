@@ -1,16 +1,18 @@
 import { API_BASE_URL } from '../config.js';
 import { apiRequest, hasAPISession, signIn, signOut } from './ai/api.js';
 import { createWorkspaceSync } from '../services/workspace-sync.js';
-import { loadPlanner, savePlanner } from '../services/storage.js';
+import { loadPlanner } from '../services/storage.js';
 import { $, showToast } from '../utils/dom.js';
 
-export function createAccount({ store, fallback }) {
+export function createAccount({ store }) {
   let user = null;
   let sync = null;
   let connecting = false;
   let epoch = 0;
   let registering = false;
-  const guest = () => loadPlanner(localStorage, fallback);
+  // Legacy device data is available only through explicit import after authentication.
+  const guest = () => loadPlanner(localStorage, { tasks: [], projects: [] });
+  const isReady = () => Boolean(user && sync && !connecting && hasAPISession());
   const status = (text) => { $('.saved').textContent = text; $('#account-sync-status').textContent = text; };
   const cacheKey = (id) => `hibi-account:${API_BASE_URL}:${id}`;
   const button = document.createElement('button');
@@ -21,6 +23,7 @@ export function createAccount({ store, fallback }) {
   dialog.className = 'account-dialog';
   dialog.setAttribute('aria-labelledby', 'account-heading');
   dialog.innerHTML = `<button type="button" class="account-close" aria-label="Close account">×</button>
+    <div class="account-welcome">Hibi<small>A little space for your day.</small></div>
     <h2 id="account-heading">Sign in to Hibi</h2>
     <p id="account-sync-status">Keep your day with you.</p>
     <form id="account-login"><div class="account-modes" role="group" aria-label="Account action">
@@ -40,8 +43,28 @@ export function createAccount({ store, fallback }) {
   const tools = $('#account-tools');
   const error = $('#account-error');
   const showError = (message) => { error.textContent = message; };
+  function lock() {
+    document.body.classList.add('auth-locked');
+    dialog.setAttribute('closedby', 'none');
+    document.querySelectorAll('dialog[open]').forEach((other) => { if (other !== dialog) other.close(); });
+    if (!dialog.open) dialog.showModal();
+  }
+  function unlock() {
+    document.body.classList.remove('auth-locked');
+    dialog.removeAttribute('closedby');
+    dialog.close();
+    globalThis.dispatchEvent(new Event('hibi-workspace-ready'));
+  }
+  dialog.addEventListener('cancel', (event) => {
+    if (document.body.classList.contains('auth-locked')) event.preventDefault();
+  });
+  dialog.addEventListener('close', () => {
+    if (document.body.classList.contains('auth-locked')) queueMicrotask(() => {
+      if (document.body.classList.contains('auth-locked') && !dialog.open) dialog.showModal();
+    });
+  });
   button.addEventListener('click', () => dialog.showModal());
-  $('.account-close', dialog).addEventListener('click', () => dialog.close());
+  $('.account-close', dialog).addEventListener('click', () => { if (isReady()) dialog.close(); });
   function setMode(register) {
     registering = register;
     form.elements.password.autocomplete = register ? 'new-password' : 'current-password';
@@ -81,18 +104,23 @@ export function createAccount({ store, fallback }) {
     const requestEpoch = ++epoch;
     connecting = true;
     sync = null;
+    user = null;
+    lock();
+    store.update({ tasks: [], projects: [], view: 'Today', filter: 'all', search: '' });
     try {
       if (!hasAPISession()) {
         user = null;
-        store.update({ ...guest(), view: 'Today', filter: 'all', search: '' });
         button.textContent = 'Sign in';
         setMode(false);
         form.hidden = false;
         tools.hidden = true;
-        status('Saved on this device');
+        status('Sign in to open your workspace.');
         return;
       }
       status('Opening your account…');
+      form.hidden = true;
+      tools.hidden = false;
+      showError('');
       const identity = await apiRequest('/api/auth/me');
       const remote = await apiRequest('/api/workspace');
       if (requestEpoch !== epoch) return;
@@ -104,10 +132,13 @@ export function createAccount({ store, fallback }) {
       $('#account-heading').textContent = 'Your Hibi account';
       form.hidden = true;
       tools.hidden = false;
+      connecting = false;
+      unlock();
     } catch (failure) {
       if (requestEpoch !== epoch) return;
       status('Account unavailable · sign in or retry');
       showError(failure.message);
+      form.hidden = hasAPISession();
       tools.hidden = false;
     } finally { if (requestEpoch === epoch) connecting = false; }
   }
@@ -177,20 +208,21 @@ export function createAccount({ store, fallback }) {
     if (sync?.snapshot().dirty) { event.preventDefault(); event.returnValue = ''; }
   });
   if (!API_BASE_URL) {
-    button.textContent = 'Device only';
-    form.hidden = true;
-    status('Saved on this device');
-    showError('Account sync will be available when the Hibi API is connected.');
+    lock();
+    status('Sign in to open your workspace.');
+    showError('Hibi cannot connect to its server yet. Please try again later.');
+    $('button[type="submit"]', form).disabled = true;
   } else void connect();
 
   return {
+    isReady,
+    getUserId: () => user?.id ?? null,
     save(planner) {
-      if (connecting || ((hasAPISession() || user) && !sync) || (sync && !hasAPISession())) {
+      if (!isReady()) {
         showToast('Open your account and retry the connection before editing.');
         return false;
       }
-      if (sync) { sync.edit({ tasks: planner.tasks, projects: planner.projects }); void sync.flush(); }
-      else savePlanner(localStorage, planner);
+      sync.edit({ tasks: planner.tasks, projects: planner.projects }); void sync.flush();
       return true;
     },
   };

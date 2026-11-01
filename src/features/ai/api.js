@@ -1,23 +1,25 @@
 import { API_BASE_URL } from '../../config.js';
 import { consumeLocalShare } from './share-store.js';
 import { apiErrorMessage } from '../../services/api-errors.js';
+import { createSessionStore } from '../../services/session.js';
 
-const TOKEN_KEY = `hibi-api-token:${API_BASE_URL}`;
-
-function getToken() {
-  try { return sessionStorage.getItem(TOKEN_KEY) || ''; }
-  catch { return ''; }
-}
+const session = createSessionStore(API_BASE_URL);
+const getToken = session.get;
+globalThis.addEventListener?.('storage', (event) => {
+  if (event.key === session.key || event.key === null) globalThis.dispatchEvent(new Event('hibi-session-changed'));
+});
 
 export function hasAPISession() { return Boolean(getToken()); }
 
-async function readResponse(response) {
+async function readResponse(response, sentToken) {
+  if (response.status === 401 && sentToken && session.clear(sentToken)) {
+    globalThis.dispatchEvent?.(new Event('hibi-session-changed'));
+  }
   if (response.status === 204) return null;
   let body;
   try { body = await response.json(); }
   catch { throw new Error('The Django API did not return JSON. Check the configured backend URL.'); }
   if (!response.ok) {
-    if (response.status === 401) { try { sessionStorage.removeItem(TOKEN_KEY); } catch {} }
     const error = new Error(apiErrorMessage(body));
     error.status = response.status;
     error.details = body.details;
@@ -27,13 +29,13 @@ async function readResponse(response) {
 }
 
 export function apiRequest(path, options = {}) {
-  if (!API_BASE_URL) throw new Error('AI is not connected yet. The planner works in UI-only mode.');
+  if (!API_BASE_URL) throw new Error('Hibi is not connected to its server yet. Please try again later.');
   const token = getToken();
   return fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: { ...(token ? { Authorization: `Token ${token}` } : {}), ...options.headers },
     credentials: 'omit',
-  }).then(readResponse);
+  }).then((response) => readResponse(response, token));
 }
 
 export async function getAIStatus() {
@@ -46,16 +48,15 @@ export async function signIn(username, password, register = false) {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
   });
-  try { sessionStorage.setItem(TOKEN_KEY, result.token); }
-  catch { throw new Error('Your browser could not save this session. Enable session storage to sign in.'); }
+  session.set(result.token);
   globalThis.dispatchEvent?.(new Event('hibi-session-changed'));
 }
 
 export async function signOut() {
+  const token = getToken();
   try { await apiRequest('/api/auth/logout', { method: 'POST' }); }
   finally {
-    try { sessionStorage.removeItem(TOKEN_KEY); } catch {}
-    globalThis.dispatchEvent?.(new Event('hibi-session-changed'));
+    if (session.clear(token)) globalThis.dispatchEvent?.(new Event('hibi-session-changed'));
   }
 }
 

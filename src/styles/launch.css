@@ -1,4 +1,11 @@
 /* Loaded separately so the opening screen does not wait for external fonts. */
+body.auth-locked > aside,
+body.auth-locked > main,
+body.auth-locked > .mobile-nav-backdrop {
+  display: none !important;
+}
+.is-launching .account-dialog { visibility: hidden; }
+.is-launching .account-dialog::backdrop { background: transparent !important; backdrop-filter: none !important; }
 body.is-launching {
   overflow: hidden;
 }

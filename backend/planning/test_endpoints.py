@@ -30,6 +30,7 @@ class EndpointContractTests(APITestCase):
             'auth/register': ('post', 400), 'auth/token': ('post', 400),
             'auth/me': ('get', 200), 'auth/logout': ('post', 204),
             'workspace': ('get', 200), 'ai/plan': ('post', 400), 'plans': ('get', 200),
+            'notifications/config': ('get', 200), 'notifications/subscriptions': ('post', 400), 'notifications/test': ('post', 400),
         }
         self.assertEqual({str(route.pattern) for route in urlpatterns}, set(contracts))
         self.authenticate()
@@ -37,7 +38,7 @@ class EndpointContractTests(APITestCase):
         for route in [name for name in contracts if name != 'auth/logout'] + ['auth/logout']:
             method, expected = contracts[route]
             response = getattr(self.client, method)(f'/api/{route}', {}, format='json')
-            self.assertEqual(response.status_code, expected, (route, response.data))
+            self.assertEqual(response.status_code, expected, (route, response.content))
             if expected != 204:
                 self.assertIn('application/json', response['Content-Type'])
 

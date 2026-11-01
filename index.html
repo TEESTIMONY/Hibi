@@ -10,7 +10,7 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <meta name="theme-color" content="#4b6ee8">
   </head>
-  <body class="is-launching">
+  <body class="is-launching auth-locked">
     <div id="launch-screen" class="launch-screen" role="status" aria-label="Opening Hibi">
       <div class="launch-brand">
         <svg class="launch-logo" viewBox="0 0 80 80" fill="none" aria-hidden="true"><rect x="2" y="2" width="76" height="76" rx="23" fill="url(#hibi-launch-blue)"/>
@@ -43,7 +43,7 @@
         <kbd>/</kbd>
       </div>
       <nav id="nav"></nav>
-      <button class="ai-sidebar-launch" data-action="open-ai" aria-label="Open AI planner"><span>✦</span><strong>Plan with AI</strong><small>NEW</small></button>
+      <button class="ai-sidebar-launch" data-action="open-ai" aria-label="Plan with AI — Premium"><span>✦</span><strong>Plan with AI</strong><small>PREMIUM</small></button>
       <div class="section-label">
         YOUR SPACES
         <button data-action="new-project" aria-label="Add project">+</button>
@@ -74,7 +74,7 @@
         </span>
         <div class="header-actions">
           <span class="saved">● Saved on this device</span>
-          <button class="ai-header-launch" data-action="open-ai">✦ <span>Plan with AI</span></button>
+          <button class="ai-header-launch" data-action="open-ai" aria-label="Plan with AI — Premium">✦ <span>Plan with AI · Premium</span></button>
           <button class="new-task" data-action="new-task">
             +
             <span>New to-do</span>
@@ -232,10 +232,12 @@
             <label>Start time<input id="task-start" type="time" step="60"></label>
             <label>Duration (minutes)<input id="task-duration" type="number" min="1" max="1440" step="1" placeholder="30"></label>
             <label>Deadline<input id="task-deadline" type="date"></label>
+            <label>Reminder<select id="task-reminder"><option value="">Off</option><option value="0">At start time</option><option value="5">5 minutes before</option><option value="10">10 minutes before</option><option value="15">15 minutes before</option><option value="30">30 minutes before</option><option value="60">1 hour before</option><option value="1440">1 day before</option></select></label>
             <label class="schedule-zone">Timezone<input id="task-zone" list="task-timezones" value="Africa/Lagos" required></label>
           </div>
           <datalist id="task-timezones"><option value="Africa/Lagos"><option value="Europe/London"><option value="America/New_York"><option value="Asia/Seoul"><option value="UTC"></datalist>
           <p id="task-schedule-error" role="alert"></p>
+          <p>For reminders, enable notifications in your account panel and set a date, start time, and duration.</p>
         </fieldset>
         <div class="modal-footer">
           <button type="button" id="delete-task">Delete</button>

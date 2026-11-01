@@ -21,6 +21,7 @@ export function createTaskEditor({ getState, onSave, onDelete }) {
     $('#task-start').value = task?.startTime?.slice(0, 5) ?? '';
     $('#task-duration').value = task?.durationMinutes ?? task?.estimatedMinutes ?? '';
     $('#task-deadline').value = task?.dueDate ?? '';
+    $('#task-reminder').value = task?.reminderMinutes ?? '';
     $('#task-zone').value = task?.timeZone ?? DEFAULT_TIME_ZONE;
     $('#task-schedule-error').textContent = '';
     $('#task-checklist').value = (task?.checks ?? []).map((item) => item.text).join('\n');
@@ -44,7 +45,7 @@ export function createTaskEditor({ getState, onSave, onDelete }) {
     try {
       schedule = schedulingFields({ date: $('#task-date').value, startTime: $('#task-start').value,
         duration: $('#task-duration').value, timeZone: $('#task-zone').value.trim(),
-        dueDate: $('#task-deadline').value, when: $('#task-when').value });
+        dueDate: $('#task-deadline').value, when: $('#task-when').value, reminderMinutes: $('#task-reminder').value });
     } catch (error) {
       $('#task-schedule-error').textContent = error instanceof RangeError ? 'Use a valid timezone, such as Africa/Lagos.' : error.message;
       return;

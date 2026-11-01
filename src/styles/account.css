@@ -21,3 +21,16 @@
 .dark .account-modes { background: #172131; }
 .dark .account-modes button { color: #becdeb; }
 .dark .account-modes button[aria-pressed=true] { background: #34445d; color: #fff; }
+.account-welcome { display: none; }
+.auth-locked .account-welcome { display: block; font: 750 32px/1.2 Manrope, sans-serif; color: #4b6ee8; margin-bottom: 28px; }
+.account-welcome small { display: block; font: 13px/1.5 'DM Sans', sans-serif; color: var(--muted); margin-top: 8px; }
+.auth-locked .account-close { display: none; }
+.auth-locked .account-dialog::backdrop { background: #f7f9fd; backdrop-filter: none; }
+.dark.auth-locked .account-dialog::backdrop { background: #172131; }
+.auth-locked .account-dialog { box-shadow: 0 16px 60px #26334a0b; padding: 28px 24px; }
+.auth-locked #account-import, .auth-locked #account-reload, .auth-locked #account-download { display: none; }
+.notification-settings { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 12px 0; display: grid; gap: 9px; }
+.notification-settings h3 { margin: 0; font-size: 14px; }
+.notification-settings p, .notification-settings small { margin: 0; font-size: 12px; line-height: 1.6; }
+.notification-settings button:disabled { opacity: .5; cursor: default; }
+.auth-locked .notification-settings { display: none; }

@@ -20,7 +20,7 @@ export function effectiveWhen(task, now = new Date()) {
   return 'Upcoming';
 }
 
-export function schedulingFields({ date, startTime, duration, timeZone, dueDate, when }, now = new Date()) {
+export function schedulingFields({ date, startTime, duration, timeZone, dueDate, when, reminderMinutes = '' }, now = new Date()) {
   // Intl validates IANA zones in both device-only and account modes.
   dateInZone(now, timeZone);
   const scheduledDate = date || (['Today', 'This Evening', 'Tomorrow'].includes(when)
@@ -30,7 +30,11 @@ export function schedulingFields({ date, startTime, duration, timeZone, dueDate,
     throw new Error('Duration must be between 1 and 1,440 minutes.');
   }
   if (startTime && (!scheduledDate || !durationMinutes)) throw new Error('Choose a date and duration for a timed task.');
-  return { scheduledDate, startTime: startTime || null, durationMinutes, timeZone, dueDate: dueDate || null };
+  const reminder = reminderMinutes === '' ? null : Number(reminderMinutes);
+  if (reminder !== null && (![0, 5, 10, 15, 30, 60, 1440].includes(reminder) || !startTime || !scheduledDate || !durationMinutes)) {
+    throw new Error('A reminder needs a date, start time, duration, and a supported reminder interval.');
+  }
+  return { scheduledDate, startTime: startTime || null, durationMinutes, timeZone, dueDate: dueDate || null, reminderMinutes: reminder };
 }
 
 export function scheduleLabel(task) {

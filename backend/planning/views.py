@@ -7,7 +7,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from .exceptions import PlanningError
-from .models import SuggestedPlan
+from .models import SuggestedPlan, PushDevice
 from .serializers import IntakeSerializer, PlanRecordSerializer
 from .services.openai import OpenAIPlanner
 
@@ -45,6 +45,7 @@ class TokenLoginView(APIView):
 
 class TokenLogoutView(APIView):
     def post(self, request):
+        PushDevice.objects.filter(user=request.user).delete()
         request.auth.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

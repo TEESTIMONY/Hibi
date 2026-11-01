@@ -12,6 +12,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from .models import Workspace, Project, Task
+from .services.push import reconcile_reminders
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -74,6 +75,7 @@ class TaskSerializer(serializers.Serializer):
     startTime = serializers.TimeField(required=False, allow_null=True, format="%H:%M", input_formats=["%H:%M", "%H:%M:%S"])
     durationMinutes = serializers.IntegerField(min_value=1, max_value=1440, required=False, allow_null=True)
     timeZone = serializers.CharField(max_length=100, default="Africa/Lagos")
+    reminderMinutes = serializers.ChoiceField(choices=[0, 5, 10, 15, 30, 60, 1440], required=False, allow_null=True)
 
     def validate_timeZone(self, value):
         try:
@@ -84,6 +86,8 @@ class TaskSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         start = attrs.get("startTime")
+        if attrs.get("reminderMinutes") is not None and not start:
+            raise serializers.ValidationError("A reminder requires a scheduled start time.")
         if start:
             if start.second or start.microsecond:
                 raise serializers.ValidationError({"startTime": "Use minute precision (HH:MM)."})
@@ -141,4 +145,5 @@ class WorkspaceView(APIView):
                         for index, name in enumerate(data["projects"])}
             Task.objects.bulk_create([Task(project=projects[task["project"]], client_id=task["id"],
                                           position=index, content=task) for index, task in enumerate(data["tasks"])])
+            reconcile_reminders(workspace, data["tasks"])
         return Response({"revision": data["revision"] + 1})

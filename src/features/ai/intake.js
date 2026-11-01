@@ -7,13 +7,13 @@ const ACCEPT = '.pdf,.docx,.txt,.md,.csv,.json,.mp3,.m4a,.mp4,.wav,.webm,.mpeg';
 const WHEN = ['Today', 'This Evening', 'Tomorrow', 'Anytime', 'Someday', 'Inbox'];
 const EXAMPLE = `Messages from our launch discussion:\n\nOlivia: Please send the revised homepage copy tomorrow. We need to check the mobile layout before publishing.\n\nMy notes: Gather the missing product photos, write a first copy draft, ask Olivia for feedback, then test the page on a phone. Budget about 45 minutes for the first draft.\n\nQuestion: Do we have final approval for the launch date?`;
 
-export function createAIIntake({ getState, onImport }) {
+export function createAIIntake({ getState, onImport, canUse = () => true }) {
   const dialog = document.createElement('dialog');
   dialog.className = 'ai-dialog';
   dialog.setAttribute('aria-labelledby', 'ai-title');
   dialog.innerHTML = `
     <div class="ai-modal-head">
-      <div class="ai-wordmark"><span>✦</span><div><strong id="ai-title">A little clarity, with AI.</strong><small>Bring the messy bits. Leave with a plan.</small></div></div>
+      <div class="ai-wordmark"><span>✦</span><div><strong id="ai-title">Plan with AI · Premium</strong><small>Bring the messy bits. Leave with a plan.</small></div></div>
       <button type="button" class="ai-close" aria-label="Close AI planner">×</button>
     </div>
     <div class="ai-columns">
@@ -71,6 +71,7 @@ export function createAIIntake({ getState, onImport }) {
   let busy = false;
   let recording = false;
   let imported = false;
+  let sessionGeneration = 0;
 
   function error(message = '') {
     find('#ai-error').textContent = message;
@@ -193,7 +194,8 @@ export function createAIIntake({ getState, onImport }) {
   });
   find('#ai-form').addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (busy || recording) return;
+    if (!canUse() || busy || recording) return;
+    const generation = sessionGeneration;
     error();
     if (!status?.backendConfigured) { find('.ai-setup').hidden = false; error('AI is not connected yet. No content has been sent.'); return; }
     if (status.requiresAuth && !status.authenticated) { find('#ai-login-form').hidden = false; error('Sign in to Hibi before creating an AI plan.'); return; }
@@ -211,7 +213,10 @@ export function createAIIntake({ getState, onImport }) {
         text: find('#ai-notes').value, goal: find('#ai-goal').value,
         project: find('#ai-project').value, files: await Promise.all(files.map(fileToSource)),
       };
-      plan = await requestPlan(payload, controller.signal);
+      if (generation !== sessionGeneration) return;
+      const result = await requestPlan(payload, controller.signal);
+      if (generation !== sessionGeneration || !canUse()) return;
+      plan = result;
       selected = new Set(plan.tasks.map((_, index) => index));
       imported = false;
       renderPlan();
@@ -240,7 +245,7 @@ export function createAIIntake({ getState, onImport }) {
     updateSelectedCount();
   });
   find('#ai-import').addEventListener('click', () => {
-    if (!plan || imported || !selected.size || busy) return;
+    if (!canUse() || !plan || imported || !selected.size || busy) return;
     if (plan.tasks.some((task, index) => selected.has(index) && !task.title.trim())) { error('Give each selected task a title before adding it.'); return; }
     const project = find('#ai-project').value;
     const tasks = createTasksFromPlan(plan, selected, project);
@@ -256,6 +261,7 @@ export function createAIIntake({ getState, onImport }) {
   dialog.addEventListener('cancel', () => { controller?.abort(); voice.stop(true); });
 
   async function open() {
+    if (!canUse()) return;
     const state = getState();
     const current = find('#ai-project').value;
     find('#ai-project').innerHTML = state.projects.map((project) => `<option>${escape(project)}</option>`).join('');
@@ -266,6 +272,7 @@ export function createAIIntake({ getState, onImport }) {
   }
 
   async function receiveSharedContent() {
+    if (!canUse()) return;
     const url = new URL(location.href);
     const token = url.searchParams.get('share');
     if (!token) return;
@@ -285,6 +292,14 @@ export function createAIIntake({ getState, onImport }) {
   }
 
   renderEmpty();
+  globalThis.addEventListener('hibi-session-changed', () => {
+    sessionGeneration++;
+    close();
+    files = []; plan = null; selected.clear(); imported = false; status = null;
+    find('#ai-form').reset();
+    renderFiles(); renderEmpty(); error();
+  });
+  globalThis.addEventListener('hibi-workspace-ready', () => { void receiveSharedContent(); });
   receiveSharedContent();
   return { open, isOpen: () => dialog.open };
 }

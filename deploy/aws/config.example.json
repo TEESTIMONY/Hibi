@@ -1,0 +1,16 @@
+{
+  "region": "REPLACE_REGION",
+  "accountId": "REPLACE_12_DIGIT_ACCOUNT_ID",
+  "imageTag": "REPLACE_COMMIT_SHA",
+  "apiHost": "api.example.com",
+  "frontendOrigin": "https://hibi-dusky.vercel.app",
+  "executionRoleArn": "REPLACE_TASK_EXECUTION_ROLE_ARN",
+  "infrastructureRoleArn": "REPLACE_ECS_EXPRESS_INFRASTRUCTURE_ROLE_ARN",
+  "subnets": ["REPLACE_APP_SUBNET_A", "REPLACE_APP_SUBNET_B"],
+  "securityGroups": ["REPLACE_APP_SECURITY_GROUP"],
+  "secretArns": {
+    "DJANGO_SECRET_KEY": "REPLACE_SECRET_ARN",
+    "DATABASE_URL": "REPLACE_SECRET_ARN",
+    "OPENAI_API_KEY": "REPLACE_SECRET_ARN"
+  }
+}
