@@ -2,6 +2,7 @@ import { $, escapeHtml as escape, showToast } from '../../utils/dom.js';
 import { getAIStatus, requestPlan, fileToSource, consumeShare, signIn, signOut } from './api.js';
 import { createTasksFromPlan } from './plan-import.js';
 import { createVoiceCapture } from './voice.js';
+import { addPasswordVisibility } from '../../components/password-visibility.js';
 
 const ACCEPT = '.pdf,.docx,.txt,.md,.csv,.json,.mp3,.m4a,.mp4,.wav,.webm,.mpeg';
 const WHEN = ['Today', 'This Evening', 'Tomorrow', 'Anytime', 'Someday', 'Inbox'];
@@ -62,6 +63,7 @@ export function createAIIntake({ getState, onImport, canUse = () => true }) {
       </section>
     </div>`;
   document.body.append(dialog);
+  addPasswordVisibility(dialog);
   const find = (selector) => $(selector, dialog);
   let files = [];
   let plan = null;

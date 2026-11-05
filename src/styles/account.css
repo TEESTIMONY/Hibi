@@ -8,6 +8,13 @@
 .account-dialog label:has(input[type=checkbox]) { display: flex; align-items: center; justify-content: space-between; min-height: 32px; }
 .account-dialog input { padding: 9px 10px; border: 1px solid #dce1eb; border-radius: 9px; font: inherit; width: 100%; box-sizing: border-box; }
 .account-dialog input[type=checkbox] { width: auto; justify-self: start; }
+.password-field { position: relative; display: block; min-width: 0; }
+.account-dialog .password-field input, .ai-dialog .password-field input { width: 100%; box-sizing: border-box; padding-right: 48px; }
+.account-dialog .password-toggle, .ai-dialog .password-toggle { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 40px; height: 36px; padding: 0; margin: 0; border: 0; border-radius: 7px; background: transparent; color: var(--muted); cursor: pointer; }
+.password-toggle:focus-visible { outline: 2px solid #4b6ee8; outline-offset: -2px; }
+.password-toggle:disabled { opacity: .45; cursor: default; }
+.password-eye-slash { display: none; }
+.password-toggle[aria-pressed=true] .password-eye-slash { display: block; }
 .account-dialog button { padding: 10px 14px; border: 1px solid #dae0eb; border-radius: 9px; background: #f3f6fd; color: #3458b8; font: inherit; cursor: pointer; }
 .account-dialog .account-close { float: right; padding: 2px 7px; margin: -6px -6px 0 4px; }
 #account-error:empty { display: none; }

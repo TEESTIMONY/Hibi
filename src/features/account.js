@@ -3,6 +3,7 @@ import { apiRequest, hasAPISession, signIn, signOut } from './ai/api.js';
 import { createWorkspaceSync } from '../services/workspace-sync.js';
 import { loadPlanner } from '../services/storage.js';
 import { $, showToast } from '../utils/dom.js';
+import { addPasswordVisibility } from '../components/password-visibility.js';
 
 export function createAccount({ store }) {
   let user = null;
@@ -59,6 +60,7 @@ export function createAccount({ store }) {
     <button type="button" id="account-download">Download device copy / backup</button>
     <button type="button" id="account-logout">Sign out</button></div>`;
   document.body.append(dialog);
+  const hidePasswords = addPasswordVisibility(dialog);
   const form = $('#account-login');
   const tools = $('#account-tools');
   const error = $('#account-error');
@@ -89,6 +91,7 @@ export function createAccount({ store }) {
     finally { control.disabled = false; }
   }
   $('[data-forgot]', form).addEventListener('click', () => {
+    hidePasswords();
     form.elements.password.value = ''; form.elements.confirmPassword.value = '';
     form.hidden = true; recovery.hidden = false;
     $('#account-heading').textContent = 'Reset your password'; showError('');
@@ -159,6 +162,7 @@ export function createAccount({ store }) {
       label.querySelector('input').disabled = !register;
       label.querySelector('input').required = register;
     });
+    hidePasswords();
     form.elements.password.autocomplete = register ? 'new-password' : 'current-password';
     $('#account-heading').textContent = register ? 'Create your Hibi account' : 'Sign in to Hibi';
     $('button[type="submit"]', form).textContent = register ? 'Create account' : 'Sign in';
