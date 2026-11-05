@@ -1,12 +1,27 @@
 // Receive phone shares entirely in the browser: Vercel serves static assets only.
 const DATABASE = 'hibi-incoming-shares';
+async function playForegroundChime() {
+  const windows = await self.clients.matchAll({ type: 'window' });
+  const visible = windows.find((client) => client.visibilityState === 'visible');
+  if (!visible) return false;
+  return new Promise((resolve) => {
+    const channel = new MessageChannel();
+    const timer = setTimeout(() => { channel.port1.close(); resolve(false); }, 700);
+    channel.port1.onmessage = (event) => {
+      clearTimeout(timer); channel.port1.close(); resolve(event.data?.played === true);
+    };
+    visible.postMessage({ type: 'hibi-play-chime' }, [channel.port2]);
+  });
+}
 self.addEventListener('push', (event) => {
   event.waitUntil((async () => {
     let payload = {};
     try { payload = event.data?.json() || {}; } catch {}
+    const played = await playForegroundChime();
     await self.registration.showNotification(String(payload.title || 'Hibi').slice(0, 100), {
       body: String(payload.body || 'Open Hibi to see your update.').slice(0, 250),
       icon: '/icon.svg', tag: String(payload.tag || 'hibi-update').slice(0, 100),
+      silent: played,
       data: { taskId: typeof payload.taskId === 'string' ? payload.taskId : '' },
     });
   })());

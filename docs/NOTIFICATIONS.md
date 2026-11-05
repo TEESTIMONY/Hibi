@@ -91,3 +91,6 @@ Backend tests exercise owner isolation, invalid/SSRF endpoints, device limits, a
 ```
 
 From the repository root: npm test, npm run check, npm run build.
+# Hibi chime
+
+In account notification settings, enable **Hibi chime while the app is open**, or tap **Preview Hibi chime** to hear the original two-note sound. It plays only for a visible, signed-in page after a successful audio-enabling tap. If playback is blocked or the app is closed, notification sound remains controlled by the phone. The preference is per device/browser. It may need another preview tap after reopening on browsers that reset audio permission.

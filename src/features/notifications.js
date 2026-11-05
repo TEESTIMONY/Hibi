@@ -1,5 +1,6 @@
 import { API_BASE_URL } from '../config.js';
 import { apiRequest, hasAPISession } from './ai/api.js';
+import { createNotificationSound } from './notification-sound.js';
 
 export function decodePushKey(value) {
   const raw = atob(value.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - value.length % 4) % 4));
@@ -13,14 +14,30 @@ export function createNotifications({ isReady, getUserId }) {
     <button type="button" data-push="enable" disabled>Enable notifications</button>
     <button type="button" data-push="test" disabled>Send test notification</button>
     <button type="button" data-push="disable" disabled>Disable on this device</button>
+    <label><input type="checkbox" data-chime> Hibi chime while the app is open</label>
+    <button type="button" data-chime-preview>Preview Hibi chime</button>
+    <small>Tap to enable sound on this device. When Hibi is closed, your phone controls the notification sound.</small>
     <small>On iPhone, add Hibi to your Home Screen and open it from there first. Reminders use generic text on your lock screen.</small>`;
   document.querySelector('#account-tools').prepend(section);
   const message = section.querySelector('p');
+  const sound = createNotificationSound({ isReady });
+  const chime = section.querySelector('[data-chime]');
+  chime.checked = sound.enabled;
+  chime.addEventListener('change', async () => {
+    if (!await sound.setEnabled(chime.checked)) {
+      chime.checked = sound.enabled;
+      message.textContent = 'Sound could not play. Tap Preview Hibi chime and try again.';
+    }
+  });
+  section.querySelector('[data-chime-preview]').addEventListener('click', async () => {
+    if (!await sound.preview()) message.textContent = 'Sound could not play. Check your device’s audio settings.';
+  });
   const enable = section.querySelector('[data-push=enable]');
   const test = section.querySelector('[data-push=test]');
   const disable = section.querySelector('[data-push=disable]');
   const ownerKey = `hibi-push-owner:${API_BASE_URL}`;
-  const supported = () => globalThis.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in globalThis && 'Notification' in globalThis;
+  const native = globalThis.Capacitor?.isNativePlatform() === true;
+  const supported = () => !native && globalThis.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in globalThis && 'Notification' in globalThis;
   let config = null;
   let busy = false;
   let generation = 0;
@@ -38,7 +55,8 @@ export function createNotifications({ isReady, getUserId }) {
     const version = ++generation;
     if (!isReady()) return;
     if (!supported()) {
-      message.textContent = 'Push is unavailable here. On iPhone, install Hibi on the Home Screen and open that app.';
+      message.textContent = native ? 'Mobile notification delivery is the next stage. You can preview the Hibi chime below.'
+        : 'Push is unavailable here. On iPhone, install Hibi on the Home Screen and open that app.';
       buttons(); return;
     }
     try {

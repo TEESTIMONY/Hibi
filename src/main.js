@@ -178,7 +178,7 @@ function openNotificationTask() {
 globalThis.addEventListener('hibi-workspace-ready', openNotificationTask);
 openNotificationTask();
 
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && !globalThis.Capacitor?.isNativePlatform()) {
   navigator.serviceWorker.register('/sw.js').catch(() => {
     // The planner works without installation; sharing requires a supported host.
   });
