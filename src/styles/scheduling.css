@@ -5,6 +5,12 @@
 .schedule-fields label { display: grid; gap: 6px; font-size: 12px; }
 .schedule-fields input, .schedule-fields select { width: 100%; min-width: 0; padding: 9px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
 .schedule-zone { grid-column: 1 / -1; }
+.schedule-input { position: relative; display: block; min-width: 0; }
+.schedule-fields input, .schedule-fields select { box-sizing: border-box; min-height: 42px; }
+.schedule-hint { display: none; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); max-width: calc(100% - 42px); color: var(--muted); font-size: 12px; white-space: nowrap; pointer-events: none; }
+.schedule-input.is-empty:not(:focus-within) .schedule-hint { display: block; }
+.schedule-input.is-empty:not(:focus-within) input { color: transparent; }
+.schedule-input.is-empty:not(:focus-within) input::-webkit-datetime-edit { opacity: 0; }
 #task-schedule-error { color: #b54c43; }
 #task-schedule-error:empty { display: none; }
 .task-schedule-label { width: 100%; font-size: 11px; }

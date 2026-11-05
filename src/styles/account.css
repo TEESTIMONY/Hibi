@@ -38,3 +38,11 @@
 #account-email { padding: 12px 0; border-bottom: 1px solid var(--line); }
 #account-email h3 { margin: 0; font-size: 14px; }
 #account-email p, #account-recovery p { margin: 0; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.account-flash { position: sticky; top: 0; z-index: 2; display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; margin: 0 0 16px; border: 1px solid #f2a5a5; border-radius: 10px; background: #fff0f0; color: #8b2020; box-shadow: 0 5px 18px #17223812; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; animation: account-flash-in .18s ease-out; }
+.account-flash[data-kind=success] { background: #eaf8ee; border-color: #88cfa1; color: #145c32; }
+.account-flash span { flex: 1; }
+.account-dialog .account-flash button { flex: none; border: 0; padding: 0 3px; background: transparent; color: inherit; font-size: 20px; line-height: 1; }
+.dark .account-flash { background: #46282e; border-color: #ac606c; color: #ffe0e5; }
+.dark .account-flash[data-kind=success] { background: #193e2e; border-color: #4e9f73; color: #d2f8df; }
+@keyframes account-flash-in { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .account-flash { animation: none; } }

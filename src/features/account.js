@@ -26,6 +26,7 @@ export function createAccount({ store }) {
     <div class="account-welcome">Hibi<small>A little space for your day.</small></div>
     <h2 id="account-heading">Sign in to Hibi</h2>
     <p id="account-sync-status">Keep your day with you.</p>
+    <div id="account-flash" class="account-flash" role="status" hidden><span></span><button type="button" aria-label="Dismiss message">×</button></div>
     <form id="account-login"><div class="account-modes" role="group" aria-label="Account action">
     <button type="button" data-account-mode="signin" aria-pressed="true">Sign in</button>
     <button type="button" data-account-mode="register" aria-pressed="false">Create account</button></div>
@@ -63,12 +64,28 @@ export function createAccount({ store }) {
   const error = $('#account-error');
   const recovery = $('#account-recovery');
   const emailForm = $('#account-email');
-  const showError = (message) => { error.textContent = message; };
+  const flash = $('#account-flash');
+  let flashTimer;
+  function showFlash(message, kind = 'error') {
+    clearTimeout(flashTimer);
+    flash.hidden = !message;
+    flash.dataset.kind = kind;
+    flash.setAttribute('role', kind === 'error' ? 'alert' : 'status');
+    $('span', flash).textContent = message;
+    if (message) flashTimer = setTimeout(() => { flash.hidden = true; }, 7000);
+  }
+  $('button', flash).addEventListener('click', () => { clearTimeout(flashTimer); flash.hidden = true; });
+  const showError = (message) => { error.textContent = message; if (!message) showFlash(''); };
+  const showSuccess = (message) => { error.textContent = ''; showFlash(message, 'success'); };
+  const showFailure = (message) => { showError(message); showFlash(message); };
+  [recovery, emailForm].forEach((target) => target.addEventListener('invalid', (event) => {
+    showFailure(event.target.validationMessage || 'Please check the highlighted field.');
+  }, true));
   const post = (path, data) => apiRequest(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
   async function submitAction(control, action) {
     control.disabled = true;
     showError('');
-    try { await action(); } catch (failure) { showError(failure.message); }
+    try { await action(); } catch (failure) { showFailure(failure.message); }
     finally { control.disabled = false; }
   }
   $('[data-forgot]', form).addEventListener('click', () => {
@@ -84,22 +101,22 @@ export function createAccount({ store }) {
     if (!recovery.elements.email.reportValidity()) return;
     void submitAction(event.currentTarget, async () => {
       const result = await post('/api/auth/password-reset/request', { email: recovery.elements.email.value.trim() });
-      showError(result.message); recovery.elements.code.focus();
+      showSuccess(result.message); recovery.elements.code.focus();
     });
   });
   recovery.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (recovery.elements.password.value !== recovery.elements.confirmPassword.value) { showError('Passwords must match.'); return; }
+    if (recovery.elements.password.value !== recovery.elements.confirmPassword.value) { showFailure('Passwords must match.'); return; }
     void submitAction($('button[type=submit]', recovery), async () => {
       const result = await post('/api/auth/password-reset/confirm', Object.fromEntries(new FormData(recovery)));
-      recovery.reset(); recovery.hidden = true; form.hidden = false; setMode(false); showError(result.message);
+      recovery.reset(); recovery.hidden = true; form.hidden = false; setMode(false); showSuccess(result.message);
     });
   });
   $('[data-email-send]').addEventListener('click', (event) => {
     if (!emailForm.elements.email.reportValidity() || !emailForm.elements.password.reportValidity()) return;
     void submitAction(event.currentTarget, async () => {
       const result = await post('/api/auth/email', { email: emailForm.elements.email.value.trim(), password: emailForm.elements.password.value });
-      showError(result.message); emailForm.elements.code.focus();
+      showSuccess(result.message); emailForm.elements.code.focus();
     });
   });
   emailForm.addEventListener('submit', (event) => {
@@ -108,7 +125,7 @@ export function createAccount({ store }) {
       const result = await post('/api/auth/email', Object.fromEntries(new FormData(emailForm)));
       user.email = result.email; emailForm.reset();
       $('[data-email-current]').textContent = result.email;
-      showError(result.message);
+      showSuccess(result.message);
     });
   });
   function lock() {

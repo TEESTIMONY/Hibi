@@ -228,10 +228,10 @@
           <legend>Schedule</legend>
           <p>Choose a date, or leave it blank to use When. Add a time and duration for a time slot.</p>
           <div class="schedule-fields">
-            <label>Scheduled date<input id="task-date" type="date"></label>
-            <label>Start time<input id="task-start" type="time" step="60"></label>
-            <label>Duration (minutes)<input id="task-duration" type="number" min="1" max="1440" step="1" placeholder="30"></label>
-            <label>Deadline<input id="task-deadline" type="date"></label>
+            <label>Scheduled date<span class="schedule-input is-empty"><input id="task-date" type="date"><span class="schedule-hint" aria-hidden="true">Choose date</span></span></label>
+            <label>Start time<span class="schedule-input is-empty"><input id="task-start" type="time" step="60"><span class="schedule-hint" aria-hidden="true">Choose time</span></span></label>
+            <label>Duration (minutes)<input id="task-duration" type="number" min="1" max="1440" step="1" placeholder="e.g. 30"></label>
+            <label>Deadline<span class="schedule-input is-empty"><input id="task-deadline" type="date"><span class="schedule-hint" aria-hidden="true">Optional date</span></span></label>
             <label>Reminder<select id="task-reminder"><option value="">Off</option><option value="0">At start time</option><option value="5">5 minutes before</option><option value="10">10 minutes before</option><option value="15">15 minutes before</option><option value="30">30 minutes before</option><option value="60">1 hour before</option><option value="1440">1 day before</option></select></label>
             <label class="schedule-zone">Timezone<input id="task-zone" list="task-timezones" value="Africa/Lagos" required></label>
           </div>

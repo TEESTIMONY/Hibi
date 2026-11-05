@@ -6,9 +6,17 @@ export function createTaskEditor({ getState, onSave, onDelete }) {
   const dialog = $('#editor');
   const form = $('#task-form');
   let editingId = null;
+  const hintedInputs = ['#task-date', '#task-start', '#task-deadline'].map((selector) => $(selector));
+  function refreshHints() {
+    hintedInputs.forEach((input) => input.parentElement.classList.toggle('is-empty', !input.value));
+  }
+  hintedInputs.forEach((input) => {
+    input.addEventListener('input', refreshHints);
+    input.addEventListener('change', refreshHints);
+  });
 
   function close() { dialog.close(); }
-  $('#task-when').addEventListener('change', () => { $('#task-date').value = ''; });
+  $('#task-when').addEventListener('change', () => { $('#task-date').value = ''; refreshHints(); });
 
   function open(id = null) {
     const { tasks, projects, view } = getState();
@@ -21,6 +29,7 @@ export function createTaskEditor({ getState, onSave, onDelete }) {
     $('#task-start').value = task?.startTime?.slice(0, 5) ?? '';
     $('#task-duration').value = task?.durationMinutes ?? task?.estimatedMinutes ?? '';
     $('#task-deadline').value = task?.dueDate ?? '';
+    refreshHints();
     $('#task-reminder').value = task?.reminderMinutes ?? '';
     $('#task-zone').value = task?.timeZone ?? DEFAULT_TIME_ZONE;
     $('#task-schedule-error').textContent = '';
