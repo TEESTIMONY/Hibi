@@ -43,10 +43,10 @@ export async function getAIStatus() {
   return { ...await apiRequest('/api/ai/status', { cache: 'no-store' }), backendConfigured: true };
 }
 
-export async function signIn(username, password, register = false) {
+export async function signIn(username, password, register = false, fields = {}) {
   const result = await apiRequest(register ? '/api/auth/register' : '/api/auth/token', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ ...fields, username, password }),
   });
   session.set(result.token);
   globalThis.dispatchEvent?.(new Event('hibi-session-changed'));

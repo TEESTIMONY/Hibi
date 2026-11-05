@@ -29,11 +29,30 @@ export function createAccount({ store }) {
     <form id="account-login"><div class="account-modes" role="group" aria-label="Account action">
     <button type="button" data-account-mode="signin" aria-pressed="true">Sign in</button>
     <button type="button" data-account-mode="register" aria-pressed="false">Create account</button></div>
-    <label>Username<input name="username" autocomplete="username" required maxlength="150"></label>
+    <label><span data-identity-label>Username or email</span><input name="username" autocomplete="username" required maxlength="254"></label>
+    <label data-registration hidden>Email<input name="email" type="email" autocomplete="email" maxlength="254" disabled></label>
     <label>Password<input name="password" type="password" autocomplete="current-password" required maxlength="128"></label>
-    <button type="submit">Sign in</button></form>
+    <label data-registration hidden>Confirm password<input name="confirmPassword" type="password" autocomplete="new-password" maxlength="128" disabled></label>
+    <button type="submit">Sign in</button>
+    <button type="button" data-forgot>Forgot password?</button></form>
+    <form id="account-recovery" hidden>
+    <p>Enter your account email. We’ll send an 8-digit code that expires in 10 minutes.</p>
+    <label>Email<input name="email" type="email" autocomplete="email" required maxlength="254"></label>
+    <button type="button" data-reset-send>Send reset code</button>
+    <label>Reset code<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{8}" minlength="8" maxlength="8" required></label>
+    <label>New password<input name="password" type="password" autocomplete="new-password" required maxlength="128"></label>
+    <label>Confirm new password<input name="confirmPassword" type="password" autocomplete="new-password" required maxlength="128"></label>
+    <button type="submit">Reset password</button>
+    <button type="button" data-reset-back>Back to sign in</button></form>
     <p id="account-error" role="alert"></p>
-    <div id="account-tools" hidden><button type="button" id="account-retry">Retry sync</button>
+    <div id="account-tools" hidden>
+    <form id="account-email"><h3>Recovery email</h3><p data-email-current></p>
+    <label>Email<input name="email" type="email" autocomplete="email" required maxlength="254"></label>
+    <label>Current password<input name="password" type="password" autocomplete="current-password" required maxlength="128"></label>
+    <button type="button" data-email-send>Send verification code</button>
+    <label>Verification code<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{8}" maxlength="8" required></label>
+    <button type="submit">Verify and save email</button></form>
+    <button type="button" id="account-retry">Retry sync</button>
     <button type="button" id="account-import">Import this device’s tasks</button>
     <button type="button" id="account-reload">Load latest account version</button>
     <button type="button" id="account-download">Download device copy / backup</button>
@@ -42,7 +61,56 @@ export function createAccount({ store }) {
   const form = $('#account-login');
   const tools = $('#account-tools');
   const error = $('#account-error');
+  const recovery = $('#account-recovery');
+  const emailForm = $('#account-email');
   const showError = (message) => { error.textContent = message; };
+  const post = (path, data) => apiRequest(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+  async function submitAction(control, action) {
+    control.disabled = true;
+    showError('');
+    try { await action(); } catch (failure) { showError(failure.message); }
+    finally { control.disabled = false; }
+  }
+  $('[data-forgot]', form).addEventListener('click', () => {
+    form.elements.password.value = ''; form.elements.confirmPassword.value = '';
+    form.hidden = true; recovery.hidden = false;
+    $('#account-heading').textContent = 'Reset your password'; showError('');
+    recovery.elements.email.focus();
+  });
+  $('[data-reset-back]').addEventListener('click', () => {
+    recovery.reset(); recovery.hidden = true; form.hidden = false; setMode(false);
+  });
+  $('[data-reset-send]').addEventListener('click', (event) => {
+    if (!recovery.elements.email.reportValidity()) return;
+    void submitAction(event.currentTarget, async () => {
+      const result = await post('/api/auth/password-reset/request', { email: recovery.elements.email.value.trim() });
+      showError(result.message); recovery.elements.code.focus();
+    });
+  });
+  recovery.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (recovery.elements.password.value !== recovery.elements.confirmPassword.value) { showError('Passwords must match.'); return; }
+    void submitAction($('button[type=submit]', recovery), async () => {
+      const result = await post('/api/auth/password-reset/confirm', Object.fromEntries(new FormData(recovery)));
+      recovery.reset(); recovery.hidden = true; form.hidden = false; setMode(false); showError(result.message);
+    });
+  });
+  $('[data-email-send]').addEventListener('click', (event) => {
+    if (!emailForm.elements.email.reportValidity() || !emailForm.elements.password.reportValidity()) return;
+    void submitAction(event.currentTarget, async () => {
+      const result = await post('/api/auth/email', { email: emailForm.elements.email.value.trim(), password: emailForm.elements.password.value });
+      showError(result.message); emailForm.elements.code.focus();
+    });
+  });
+  emailForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    void submitAction($('button[type=submit]', emailForm), async () => {
+      const result = await post('/api/auth/email', Object.fromEntries(new FormData(emailForm)));
+      user.email = result.email; emailForm.reset();
+      $('[data-email-current]').textContent = result.email;
+      showError(result.message);
+    });
+  });
   function lock() {
     document.body.classList.add('auth-locked');
     dialog.setAttribute('closedby', 'none');
@@ -67,6 +135,13 @@ export function createAccount({ store }) {
   $('.account-close', dialog).addEventListener('click', () => { if (isReady()) dialog.close(); });
   function setMode(register) {
     registering = register;
+    $('[data-identity-label]', form).textContent = register ? 'Username' : 'Username or email';
+    form.elements.username.maxLength = register ? 150 : 254;
+    form.querySelectorAll('[data-registration]').forEach((label) => {
+      label.hidden = !register;
+      label.querySelector('input').disabled = !register;
+      label.querySelector('input').required = register;
+    });
     form.elements.password.autocomplete = register ? 'new-password' : 'current-password';
     $('#account-heading').textContent = register ? 'Create your Hibi account' : 'Sign in to Hibi';
     $('button[type="submit"]', form).textContent = register ? 'Create account' : 'Sign in';
@@ -105,6 +180,7 @@ export function createAccount({ store }) {
     connecting = true;
     sync = null;
     user = null;
+    recovery.hidden = true; recovery.reset(); emailForm.reset();
     lock();
     store.update({ tasks: [], projects: [], view: 'Today', filter: 'all', search: '' });
     try {
@@ -125,6 +201,7 @@ export function createAccount({ store }) {
       const remote = await apiRequest('/api/workspace');
       if (requestEpoch !== epoch) return;
       user = identity;
+      $('[data-email-current]').textContent = user.email || 'Add an email so you can recover your account.';
       let cached = null;
       try { cached = JSON.parse(localStorage.getItem(cacheKey(user.id))); } catch { /* Cloud is authoritative without a valid local cache. */ }
       attach(remote, cached);
@@ -150,8 +227,11 @@ export function createAccount({ store }) {
     submit.disabled = true;
     showError('');
     try {
-      await signIn(form.elements.username.value.trim(), form.elements.password.value, isRegistration);
+      if (isRegistration && form.elements.password.value !== form.elements.confirmPassword.value) throw new Error('Passwords must match.');
+      await signIn(form.elements.username.value.trim(), form.elements.password.value, isRegistration,
+        isRegistration ? { email: form.elements.email.value.trim(), confirmPassword: form.elements.confirmPassword.value } : {});
       form.elements.password.value = '';
+      form.elements.confirmPassword.value = '';
     } catch (failure) {
       const duplicate = isRegistration && failure.details?.username?.some((message) => /already exists|already taken/i.test(message));
       showError(duplicate ? 'This username already has an account. Choose Sign in to use it, or pick a different username.' : failure.message);

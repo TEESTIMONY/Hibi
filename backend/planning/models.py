@@ -7,6 +7,24 @@ class Workspace(models.Model):
     revision = models.PositiveIntegerField(default=0)
 
 
+class AccountEmail(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    email = models.EmailField(unique=True)
+
+
+class EmailChallenge(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)
+    email = models.EmailField()
+    purpose = models.CharField(max_length=12)
+    digest = models.CharField(max_length=64)
+    expires_at = models.DateTimeField()
+    sent_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["email", "purpose"], name="unique_email_challenge")]
+
+
 class Project(models.Model):
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="projects")
     name = models.CharField(max_length=100)

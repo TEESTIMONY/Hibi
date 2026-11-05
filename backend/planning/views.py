@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from rest_framework import generics, permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
@@ -7,7 +8,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from .exceptions import PlanningError
-from .models import SuggestedPlan, PushDevice
+from .models import SuggestedPlan, PushDevice, AccountEmail
 from .serializers import IntakeSerializer, PlanRecordSerializer
 from .services.openai import OpenAIPlanner
 
@@ -37,7 +38,14 @@ class TokenLoginView(APIView):
     throttle_scope = "login"
 
     def post(self, request):
-        serializer = AuthTokenSerializer(data=request.data, context={"request": request})
+        data = request.data.copy()
+        identity = data.get("username", "")
+        if isinstance(identity, str) and "@" in identity:
+            address = AccountEmail.objects.select_related("user").filter(email=identity.strip().lower()).first()
+            named = get_user_model().objects.filter(username=identity.strip()).first()
+            if address and (not named or named.pk == address.user_id):
+                data["username"] = address.user.username
+        serializer = AuthTokenSerializer(data=data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         token, _ = Token.objects.get_or_create(user=serializer.validated_data["user"])
         return Response({"token": token.key})

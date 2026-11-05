@@ -11,20 +11,35 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
-from .models import Workspace, Project, Task
+from .models import Workspace, Project, Task, AccountEmail
 from .services.push import reconcile_reminders
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, max_length=128, trim_whitespace=False)
+    email = serializers.EmailField(max_length=254)
+    confirmPassword = serializers.CharField(write_only=True, max_length=128, trim_whitespace=False)
 
     class Meta:
         model = get_user_model()
-        fields = ["username", "password"]
+        fields = ["username", "email", "password", "confirmPassword"]
+
+    def validate_username(self, value):
+        if "@" in value:
+            raise serializers.ValidationError("Use a username without @. Enter your email in the email field.")
+        return value
+
+    def validate_email(self, value):
+        value = value.strip().lower()
+        if AccountEmail.objects.filter(email=value).exists() or get_user_model().objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("That email cannot be used. Sign in or reset your password if you already have an account.")
+        return value
 
     def validate(self, attrs):
+        if attrs["password"] != attrs.pop("confirmPassword"):
+            raise serializers.ValidationError({"confirmPassword": "Passwords must match."})
         try:
-            validate_password(attrs["password"], get_user_model()(username=attrs["username"]))
+            validate_password(attrs["password"], get_user_model()(username=attrs["username"], email=attrs["email"]))
         except ValidationError as exc:
             raise serializers.ValidationError({"password": exc.messages})
         return attrs
@@ -42,15 +57,17 @@ class RegisterView(APIView):
         try:
             with transaction.atomic():
                 user = get_user_model().objects.create_user(**serializer.validated_data)
+                AccountEmail.objects.create(user=user, email=user.email)
                 token = Token.objects.create(user=user)
         except IntegrityError:
-            raise serializers.ValidationError({"username": "This username is already taken."})
+            raise serializers.ValidationError("That username or email cannot be used. Try signing in or choose another.")
         return Response({"token": token.key}, status=status.HTTP_201_CREATED)
 
 
 class MeView(APIView):
     def get(self, request):
-        return Response({"id": request.user.pk, "username": request.user.username})
+        address = AccountEmail.objects.filter(user=request.user).first()
+        return Response({"id": request.user.pk, "username": request.user.username, "email": address.email if address else ""})
 
 
 class ChecklistSerializer(serializers.Serializer):

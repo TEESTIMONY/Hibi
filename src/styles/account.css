@@ -34,3 +34,7 @@
 .notification-settings p, .notification-settings small { margin: 0; font-size: 12px; line-height: 1.6; }
 .notification-settings button:disabled { opacity: .5; cursor: default; }
 .auth-locked .notification-settings { display: none; }
+.auth-locked #account-email { display: none; }
+#account-email { padding: 12px 0; border-bottom: 1px solid var(--line); }
+#account-email h3 { margin: 0; font-size: 14px; }
+#account-email p, #account-recovery p { margin: 0; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }

@@ -26,6 +26,7 @@ class EndpointContractTests(APITestCase):
 
     def test_route_inventory_and_supported_methods(self):
         contracts = {
+            'auth/password-reset/request': ('post', 400), 'auth/password-reset/confirm': ('post', 400), 'auth/email': ('post', 400),
             'health': ('get', 200), 'ai/status': ('get', 200),
             'auth/register': ('post', 400), 'auth/token': ('post', 400),
             'auth/me': ('get', 200), 'auth/logout': ('post', 204),
@@ -65,7 +66,7 @@ class EndpointContractTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {response.data['token']}")
         identity = self.client.get('/api/auth/me')
-        self.assertEqual(identity.data, {'id': self.user.pk, 'username': self.user.username})
+        self.assertEqual(identity.data, {'id': self.user.pk, 'username': self.user.username, 'email': ''})
         self.assertTrue(self.client.get('/api/ai/status').data['authenticated'])
         self.assertEqual(self.client.post('/api/auth/logout').status_code, 204)
         self.assertEqual(self.client.get('/api/auth/me').status_code, 401)

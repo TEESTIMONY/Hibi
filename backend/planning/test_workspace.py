@@ -81,7 +81,7 @@ class WorkspaceTests(APITestCase):
         self.client.force_authenticate(None)
         weak = self.client.post('/api/auth/register', {'username': 'new-person', 'password': '123'}, format='json')
         self.assertEqual(weak.status_code, 400)
-        result = self.client.post('/api/auth/register', {'username': 'new-person', 'password': 'Synthetic-test-strong-74!'}, format='json')
+        result = self.client.post('/api/auth/register', {'username': 'new-person', 'email': 'new-person@example.com', 'password': 'Synthetic-test-strong-74!', 'confirmPassword': 'Synthetic-test-strong-74!'}, format='json')
         self.assertEqual(result.status_code, 201, result.data)
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {result.data['token']}")
         self.assertEqual(self.client.get('/api/auth/me').data['username'], 'new-person')
