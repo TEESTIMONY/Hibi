@@ -19,7 +19,7 @@ from rest_framework.views import APIView
 
 from .models import AccountEmail, EmailChallenge, PushDevice
 
-GENERIC = {"message": "If an eligible account uses that email, a reset code has been sent. Check your inbox and spam folder."}
+GENERIC = {"message": "Reset code sent successfully. Check your inbox and spam folder."}
 INVALID = "This code is invalid or expired. Request a new code."
 
 

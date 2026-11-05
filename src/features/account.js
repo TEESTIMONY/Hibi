@@ -82,10 +82,10 @@ export function createAccount({ store }) {
     showFailure(event.target.validationMessage || 'Please check the highlighted field.');
   }, true));
   const post = (path, data) => apiRequest(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-  async function submitAction(control, action) {
+  async function submitAction(control, action, failureTitle = '') {
     control.disabled = true;
     showError('');
-    try { await action(); } catch (failure) { showFailure(failure.message); }
+    try { await action(); } catch (failure) { showFailure(failureTitle ? `${failureTitle} ${failure.message || 'Please try again.'}` : failure.message); }
     finally { control.disabled = false; }
   }
   $('[data-forgot]', form).addEventListener('click', () => {
@@ -102,7 +102,7 @@ export function createAccount({ store }) {
     void submitAction(event.currentTarget, async () => {
       const result = await post('/api/auth/password-reset/request', { email: recovery.elements.email.value.trim() });
       showSuccess(result.message); recovery.elements.code.focus();
-    });
+    }, 'Failed to send reset code.');
   });
   recovery.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -110,7 +110,7 @@ export function createAccount({ store }) {
     void submitAction($('button[type=submit]', recovery), async () => {
       const result = await post('/api/auth/password-reset/confirm', Object.fromEntries(new FormData(recovery)));
       recovery.reset(); recovery.hidden = true; form.hidden = false; setMode(false); showSuccess(result.message);
-    });
+    }, 'Password reset failed.');
   });
   $('[data-email-send]').addEventListener('click', (event) => {
     if (!emailForm.elements.email.reportValidity() || !emailForm.elements.password.reportValidity()) return;
