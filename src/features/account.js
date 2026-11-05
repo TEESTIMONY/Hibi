@@ -317,6 +317,10 @@ export function createAccount({ store }) {
 
   return {
     isReady,
+    async preparePlanning() {
+      if (!isReady() || !await sync.flush() || !isReady()) throw new Error('Sync your account before planning.');
+      return sync.snapshot().revision;
+    },
     getUserId: () => user?.id ?? null,
     save(planner) {
       if (!isReady()) {

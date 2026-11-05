@@ -1,0 +1,13 @@
+# Tasks from notes — rule-based extraction
+
+Use **Tasks from notes** beside **Plan my time**. Paste up to 20,000 characters, choose a timezone and space, and request suggestions. Every suggestion starts unselected. Review/edit its title, planned date, deadline, duration and priority, read the source and warnings, then select and add it. The existing workspace sync saves the selected tasks; the parser endpoint itself never writes tasks or stores the pasted document.
+
+This is an intentionally narrow English parser, not general conversation understanding. It recognises an explicit list of action verbs at the start of a line/sentence after common polite prefixes, TODO markers, bullets and bracketed WhatsApp headers. It skips obvious negation, completion language and conditional statements. Matching actions are deduplicated within the paste. It stops after 100 suggestions. Sentence punctuation and abbreviated/complex prose may be parsed imperfectly.
+
+Supported dates: today, tomorrow, weekday names and YYYY-MM-DD. Weekdays use the next occurrence including today; “next” on the current weekday advances seven days. Forwarded-message timestamps are not used as the reference date: a warning tells the user which present-day date/timezone was used. Numeric slash dates, vague dates and conflicting dates need review. “By”, “before”, “due” and “deadline” indicate an end-of-day deadline suggestion; the user must check that interpretation.
+
+Numeric minutes/hours yield an estimate; multiple/invalid durations are left unset. “In 30 minutes” is flagged as a relative start rather than treated as duration. Mentioned clock times remain in the original note rather than silently creating fixed slots. Set a fixed time in the task editor, or use Plan my time after adding a duration. No inferred task ownership, dependencies, document upload or voice transcription in this version. Repeated/negated/ambiguous human language still requires careful review; unsupported lines can be added manually.
+
+All dates and titles remain editable. Source text is preserved in each imported task's notes. Existing unfinished tasks with the same title in the selected space are flagged at import. The screen discards its drafts on sign-out/account changes and ignores stale responses. No OpenAI request or external parsing service is used.
+
+Authenticated `POST /api/tasks/extract` accepts `text` and `timeZone`; returns `suggestions`, `skippedLines` and a review message. Output includes source text, date suggestions, duration, priority, mentioned time and warnings. The endpoint has the existing authenticated request throttle. There is no extra dependency or database migration. Deploy backend and frontend together.

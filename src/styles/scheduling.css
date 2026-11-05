@@ -5,6 +5,34 @@
 .schedule-fields label { display: grid; gap: 6px; font-size: 12px; }
 .schedule-fields input, .schedule-fields select { width: 100%; min-width: 0; padding: 9px; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
 .schedule-zone { grid-column: 1 / -1; }
+.smart-schedule-launch { border: 1px solid var(--line); background: var(--bg); color: var(--text); padding: 10px 14px; border-radius: 10px; cursor: pointer; font: inherit; margin: 0 0 16px; }
+.smart-schedule-launch span { color: var(--muted); font-size: 11px; margin-left: 10px; }
+.smart-schedule-dialog { width: min(660px, calc(100% - 24px)); max-height: 88dvh; box-sizing: border-box; overflow: auto; border: 1px solid var(--line); border-radius: 18px; padding: 24px; background: var(--bg); color: var(--text); }
+.smart-schedule-dialog::backdrop { background: #19233880; backdrop-filter: blur(7px); }
+.smart-schedule-head { display: flex; justify-content: space-between; gap: 12px; }
+.smart-schedule-head small { color: var(--muted); font-size: 10px; letter-spacing: .08em; }
+.smart-schedule-dialog h2 { font-size: 23px; margin: 8px 0; }
+.smart-schedule-dialog h3 { font-size: 15px; }
+.smart-schedule-dialog p, .smart-schedule-dialog small { font-size: 12px; line-height: 1.6; }
+.smart-schedule-settings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.smart-schedule-dialog label { display: grid; gap: 5px; min-width: 0; font-size: 12px; }
+.smart-schedule-dialog input, .smart-schedule-dialog select { min-width: 0; width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); padding: 10px; font: inherit; }
+.smart-schedule-dialog button { min-height: 40px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; cursor: pointer; font: inherit; }
+.smart-schedule-task { display: grid; grid-template-columns: minmax(0, 1fr) 85px 95px; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+.smart-schedule-task > label:first-child { display: flex; align-items: center; gap: 10px; overflow-wrap: anywhere; }
+.smart-schedule-task input[type=checkbox] { width: 18px; height: 18px; flex: none; }
+.smart-schedule-task small { display: block; color: var(--muted); }
+.smart-schedule-dialog article { border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin: 8px 0; }
+.smart-schedule-dialog article p { margin: 5px 0; }
+.smart-schedule-dialog [hidden] { display: none !important; }
+.message-tasks-dialog textarea { width: 100%; box-sizing: border-box; resize: vertical; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--text); font: inherit; line-height: 1.6; }
+.message-tasks-dialog form { display: grid; gap: 14px; }
+.message-tasks-dialog article { display: grid; gap: 12px; }
+.message-tasks-dialog .message-pick { display: flex; align-items: center; gap: 8px; }
+.message-pick input { width: 18px; height: 18px; }
+.message-tasks-dialog ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.message-tasks-dialog summary { cursor: pointer; font-size: 12px; }
+@media (max-width: 500px) { .smart-schedule-dialog { padding: 18px; } .smart-schedule-task { grid-template-columns: repeat(2, minmax(0, 1fr)); } .smart-schedule-task > label:first-child { grid-column: 1 / -1; } .smart-schedule-dialog input, .smart-schedule-dialog select { font-size: 16px; } }
 .schedule-input { position: relative; display: block; min-width: 0; }
 .schedule-fields input, .schedule-fields select { box-sizing: border-box; min-height: 42px; }
 .schedule-hint { display: none; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); max-width: calc(100% - 42px); color: var(--muted); font-size: 12px; white-space: nowrap; pointer-events: none; }

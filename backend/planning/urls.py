@@ -3,8 +3,12 @@ from .views import AIStatusView, HealthView, PlanHistoryView, SuggestPlanView, T
 from .workspace import RegisterView, MeView, WorkspaceView
 from .notifications import NotificationConfigView, PushDeviceView, TestNotificationView
 from .account_recovery import ResetRequestView, ResetConfirmView, SaveEmailView
+from .scheduling import SchedulePreviewView
+from .message_tasks import MessageTasksView
 
 urlpatterns = [
+    path("tasks/extract", MessageTasksView.as_view()),
+    path("schedule/preview", SchedulePreviewView.as_view()),
     path("auth/password-reset/request", ResetRequestView.as_view()),
     path("auth/password-reset/confirm", ResetConfirmView.as_view()),
     path("auth/email", SaveEmailView.as_view()),

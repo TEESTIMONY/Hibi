@@ -13,6 +13,8 @@ import { createAccount } from './features/account.js';
 import { setupMobileNavigation } from './features/mobile-navigation.js';
 import { renderSchedule } from './components/schedule.js';
 import { createNotifications } from './features/notifications.js';
+import { createSmartSchedule } from './features/smart-schedule.js';
+import { createMessageTasks } from './features/message-tasks.js';
 
 const store = createStore({
   tasks: [], projects: [],
@@ -82,6 +84,8 @@ const aiIntake = createAIIntake({
 });
 
 const actions = {
+  'message-tasks': () => messageTasks.open(),
+  'smart-schedule': () => smartSchedule.open(),
   'open-ai': () => aiIntake.open(),
   'new-task': () => editor.open(),
   'new-project': createProject,
@@ -92,6 +96,9 @@ const actions = {
     showToast(showCompleted ? 'Completed tasks are visible' : 'Completed tasks are hidden');
   },
 };
+const smartSchedule = createSmartSchedule({ account, getState: store.getState, onApply: (tasks) => saveChanges({ tasks }) });
+const messageTasks = createMessageTasks({ account, getState: store.getState,
+  onImport: (tasks) => saveChanges({ tasks: [...store.getState().tasks, ...tasks] }) });
 
 // Delegate dynamic list events once, rather than rebinding after every render.
 document.addEventListener('click', (event) => {
@@ -136,7 +143,7 @@ document.addEventListener('keydown', (event) => {
     editor.open(task.dataset.edit);
     return;
   }
-  if (event.ctrlKey || event.metaKey || event.altKey || editor.isOpen() || aiIntake.isOpen()) return;
+  if (event.ctrlKey || event.metaKey || event.altKey || editor.isOpen() || aiIntake.isOpen() || smartSchedule.isOpen() || messageTasks.isOpen()) return;
   if (event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
   if (event.key.toLowerCase() === 'n') {
     event.preventDefault();

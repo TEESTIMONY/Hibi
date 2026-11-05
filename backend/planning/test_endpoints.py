@@ -26,6 +26,8 @@ class EndpointContractTests(APITestCase):
 
     def test_route_inventory_and_supported_methods(self):
         contracts = {
+            'tasks/extract': ('post', 400),
+            'schedule/preview': ('post', 400),
             'auth/password-reset/request': ('post', 400), 'auth/password-reset/confirm': ('post', 400), 'auth/email': ('post', 400),
             'health': ('get', 200), 'ai/status': ('get', 200),
             'auth/register': ('post', 400), 'auth/token': ('post', 400),
@@ -46,7 +48,7 @@ class EndpointContractTests(APITestCase):
     def test_every_protected_route_rejects_missing_and_invalid_tokens(self):
         for authorization in ['', 'Token invalid-token']:
             self.client.credentials(HTTP_AUTHORIZATION=authorization)
-            for route, method in [('auth/me', 'get'), ('auth/logout', 'post'), ('workspace', 'get'),
+            for route, method in [('tasks/extract', 'post'), ('schedule/preview', 'post'), ('auth/me', 'get'), ('auth/logout', 'post'), ('workspace', 'get'),
                                   ('workspace', 'put'), ('ai/plan', 'post'), ('plans', 'get')]:
                 response = getattr(self.client, method)(f'/api/{route}', {}, format='json')
                 self.assertEqual(response.status_code, 401, (route, response.data))
