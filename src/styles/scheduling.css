@@ -32,6 +32,11 @@
 .message-pick input { width: 18px; height: 18px; }
 .message-tasks-dialog ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .message-tasks-dialog summary { cursor: pointer; font-size: 12px; }
+.planner-home > button { display: grid; text-align: left; gap: 6px; width: 100%; padding: 18px; margin: 12px 0; background: var(--bg); color: var(--text); }
+.planner-home > button strong { font-size: 16px; }
+.planner-home > button span { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.planner-home details { padding-top: 16px; border-top: 1px solid var(--line); margin-top: 20px; }
+.planner-home summary { font-size: 12px; color: var(--muted); cursor: pointer; }
 @media (max-width: 500px) { .smart-schedule-dialog { padding: 18px; } .smart-schedule-task { grid-template-columns: repeat(2, minmax(0, 1fr)); } .smart-schedule-task > label:first-child { grid-column: 1 / -1; } .smart-schedule-dialog input, .smart-schedule-dialog select { font-size: 16px; } }
 .schedule-input { position: relative; display: block; min-width: 0; }
 .schedule-fields input, .schedule-fields select { box-sizing: border-box; min-height: 42px; }
